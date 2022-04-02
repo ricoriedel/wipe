@@ -1,14 +1,19 @@
 use clap::Parser;
 use rand::rngs::OsRng;
 use crate::char::CharSampler;
+use crate::fill::FillModeEnum;
 use crate::pallet::{choose_pallet, create_pallet, PalletEnum};
 
 mod pallet;
 mod char;
+mod fill;
+mod vec;
 
 #[derive(Parser)]
 #[clap(author = "Rico Riedel", version = "0.1.0", about = "Wipe your terminal with a random animation.")]
 struct Args {
+    #[clap(short, long, help = "Add fill mode", arg_enum)]
+    fill: Vec<FillModeEnum>,
     #[clap(short, long, help = "Add color pallet", arg_enum)]
     pallet: Vec<PalletEnum>,
     #[clap(long, default_value = ".-+%#", help = "Set chars")]
