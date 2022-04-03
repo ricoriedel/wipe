@@ -6,7 +6,14 @@ use rand::Rng;
 use crate::fill::level::LevelFillMode;
 use crate::vec::Vector;
 
+/// Used to choose the colors of characters.
 pub trait FillMode {
+    /// Gets the color for this character.
+    /// # Arguments
+    /// * `level`:
+    /// * `pos`:
+    ///
+    /// returns: f32
     fn sample(&self, level: f32, pos: Vector) -> f32;
 }
 

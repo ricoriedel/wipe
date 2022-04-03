@@ -4,6 +4,7 @@ use rand::prelude::IteratorRandom;
 use rand::Rng;
 use clap::ArgEnum;
 
+/// A collection of colors.
 pub struct Pallet {
     values: Vec<Color>
 }
@@ -45,6 +46,9 @@ impl Pallet {
         Pallet::new(vec![Magenta, Blue, Green, Yellow, Red])
     }
 
+    /// Gets a color for the given fill.
+    /// # Arguments
+    /// * `fill`: `0 <= fill` and `fill < 1`
     pub fn sample(&self, fill: f32) -> Color {
         let pos = self.values.len() as f32 * fill;
         let index = pos as usize;
@@ -65,6 +69,12 @@ pub enum PalletEnum {
     Rainbow
 }
 
+
+/// Chooses a random color pallet.
+/// If none is provided, a random one of all available is chosen.
+/// # Arguments
+/// * `options`: A list of all options.
+/// * `rng`: The number generator.
 pub fn choose_pallet(mut options: Vec<PalletEnum>, rng: &mut impl Rng) -> PalletEnum {
     if options.is_empty() {
         options.push(PalletEnum::Red);
@@ -79,6 +89,9 @@ pub fn choose_pallet(mut options: Vec<PalletEnum>, rng: &mut impl Rng) -> Pallet
     options.into_iter().choose(rng).unwrap()
 }
 
+/// Creates the requested pallet.
+/// # Arguments
+/// * `pallet`: The pallet type.
 pub fn create_pallet(pallet: PalletEnum) -> Pallet {
     match pallet {
         PalletEnum::Red => Pallet::red(),
