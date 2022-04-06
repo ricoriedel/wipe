@@ -6,16 +6,16 @@ use crossterm::terminal::{Clear, ClearType};
 use std::io::Write;
 use crate::array::Array2D;
 
-pub trait Renderer {
+pub trait Surface {
     fn width(&self) -> usize;
     fn height(&self) -> usize;
     fn draw(&mut self, x: usize, y: usize, char: char, color: Color);
     fn clear(&mut self, x: usize, y: usize);
-    fn render(&mut self) -> Result<(), Error>;
+    fn present(&mut self) -> Result<(), Error>;
     fn purge(&mut self) -> Result<(), Error>;
 }
 
-pub struct WriteRenderer<T> {
+pub struct WriteSurface<T> {
     out: T,
     array: Array2D<Cell>,
 }
@@ -31,7 +31,7 @@ impl Default for Cell {
     fn default() -> Self { Cell::Keep }
 }
 
-impl<T> WriteRenderer<T> {
+impl<T> WriteSurface<T> {
     pub fn new(out: T, width: usize, height: usize) -> Self {
         Self {
             out,
@@ -40,7 +40,7 @@ impl<T> WriteRenderer<T> {
     }
 }
 
-impl<T: Write> Renderer for WriteRenderer<T> {
+impl<T: Write> Surface for WriteSurface<T> {
     fn width(&self) -> usize {
         self.array.width()
     }
@@ -57,7 +57,7 @@ impl<T: Write> Renderer for WriteRenderer<T> {
         self.array[(x, y)] = Cell::Draw { char: ' ', color: Color::Reset };
     }
 
-    fn render(&mut self) -> Result<(), Error> {
+    fn present(&mut self) -> Result<(), Error> {
         let mut needs_move;
         let mut last_color = None;
 
@@ -143,7 +143,7 @@ mod test {
     fn width() {
         let data = Data::new();
         let mock = MockWrite::new(data);
-        let renderer = WriteRenderer::new(mock, 10, 2);
+        let renderer = WriteSurface::new(mock, 10, 2);
 
         assert_eq!(10, renderer.width());
     }
@@ -152,7 +152,7 @@ mod test {
     fn height() {
         let data = Data::new();
         let mock = MockWrite::new(data);
-        let renderer = WriteRenderer::new(mock, 5, 8);
+        let renderer = WriteSurface::new(mock, 5, 8);
 
         assert_eq!(8, renderer.height());
     }
@@ -162,7 +162,7 @@ mod test {
         // Execute
         let data = Data::new();
         let mock = MockWrite::new(data.clone());
-        let mut renderer = WriteRenderer::new(mock, 4, 4);
+        let mut renderer = WriteSurface::new(mock, 4, 4);
 
         renderer.purge().unwrap();
 
@@ -177,16 +177,16 @@ mod test {
     }
 
     #[test]
-    fn render() {
+    fn present() {
         // Execute
         let data = Data::new();
         let mock = MockWrite::new(data.clone());
-        let mut renderer = WriteRenderer::new(mock, 3, 2);
+        let mut renderer = WriteSurface::new(mock, 3, 2);
 
         renderer.draw(0, 0, 'A', Color::Green);
         renderer.draw(1, 0, 'x', Color::Green);
         renderer.clear(1, 1);
-        renderer.render().unwrap();
+        renderer.present().unwrap();
 
         // Recreate expectation
         let expected = Data::new();
