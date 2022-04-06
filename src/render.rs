@@ -15,8 +15,8 @@ pub trait Renderer {
     fn purge(&mut self) -> Result<(), Error>;
 }
 
-pub struct WriteRenderer {
-    out: Box<dyn Write>,
+pub struct WriteRenderer<T> {
+    out: T,
     array: Array2D<Cell>,
 }
 
@@ -31,8 +31,8 @@ impl Default for Cell {
     fn default() -> Self { Cell::Keep }
 }
 
-impl WriteRenderer {
-    pub fn new(out: Box<dyn Write>, width: usize, height: usize) -> Self {
+impl<T> WriteRenderer<T> {
+    pub fn new(out: T, width: usize, height: usize) -> Self {
         Self {
             out,
             array: Array2D::new(width, height)
@@ -40,7 +40,7 @@ impl WriteRenderer {
     }
 }
 
-impl Renderer for WriteRenderer {
+impl<T: Write> Renderer for WriteRenderer<T> {
     fn width(&self) -> usize {
         self.array.width()
     }
