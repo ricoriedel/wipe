@@ -1,7 +1,5 @@
 mod level;
 
-pub mod factory;
-
 use crate::vec::Vector;
 
 /// Used to choose the colors of characters.

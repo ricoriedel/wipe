@@ -1,5 +1,3 @@
-pub mod factory;
-
 use crossterm::style::Color;
 use crossterm::style::Color::*;
 
