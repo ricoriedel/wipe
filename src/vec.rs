@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 /// A vector with a x and y axis.
 #[derive(Copy, Clone)]
 pub struct Vector {
@@ -12,12 +14,28 @@ impl Vector {
         Self { x, y }
     }
 
+    pub fn center(self) -> Self {
+        Self::new(self.x / 2.0, self.y / 2.0)
+    }
+
+    pub fn length(self) -> f32 {
+        (self.x * self.x + self.y * self.y).sqrt()
+    }
+
     /// Creates a vector with the on screen coordinates based on the terminal coordinates.
     /// # Arguments
     /// * `x`: The x axis of the terminal character.
     /// * `y`: The y axis of the terminal character.
     pub fn from_terminal(x: usize, y: usize) -> Self {
         Self::new(x as f32, y as f32 * 2.0)
+    }
+}
+
+impl Sub for Vector {
+    type Output = Vector;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vector::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
