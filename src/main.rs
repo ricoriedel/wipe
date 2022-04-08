@@ -7,6 +7,7 @@ mod vec;
 mod array;
 mod surface;
 mod animation;
+mod sampler;
 
 #[derive(Parser)]
 #[clap(author = "Rico Riedel", version = "0.1.0", about = "Wipe your terminal with a random animation.")]
