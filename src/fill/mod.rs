@@ -1,4 +1,5 @@
 mod level;
+mod circle;
 
 use crate::vec::Vector;
 
