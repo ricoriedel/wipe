@@ -53,50 +53,55 @@ impl Sampler for ComposedSampler {
 
 #[cfg(test)]
 mod test {
-    use crate::char::SimpleCharSampler;
+    use mockall::predicate::{always, eq};
     use super::*;
-
-    struct MockAnimation;
-    struct MockFillMode;
-    struct MockColorSampler;
-
-    impl Animation for MockAnimation {
-        fn sample(&self, step: f32, pos: Vector) -> f32 {
-            step + pos.x + pos.y
-        }
-    }
-    impl FillMode for MockFillMode {
-        fn sample(&self, level: f32, pos: Vector) -> f32 {
-            level + pos.x + pos.y
-        }
-    }
-    impl ColorSampler for MockColorSampler {
-        fn sample(&self, _: f32) -> Color {
-            Color::Green
-        }
-    }
-
-    fn create_sampler() -> ComposedSampler {
-        let anim = Box::new(MockAnimation { });
-        let fill = Box::new(MockFillMode { });
-        let color = Box::new(MockColorSampler { });
-        let char = Box::new(SimpleCharSampler::new("0123456789".to_string()));
-
-        ComposedSampler::new(anim, fill, color, char)
-    }
+    use crate::animation::MockAnimation;
+    use crate::fill::MockFillMode;
+    use crate::color::MockColorSampler;
+    use crate::char::MockCharSampler;
 
     #[test]
     fn sample_keep() {
-        assert!(matches!(create_sampler().sample(0.7, Vector::new(0.3, 0.1)), Sample::Keep));
+        let mut anim = Box::new(MockAnimation::new());
+        let fill = Box::new(MockFillMode::new());
+        let color = Box::new(MockColorSampler::new());
+        let char = Box::new(MockCharSampler::new());
+
+        anim.expect_sample().return_const(3.0);
+
+        let sampler = ComposedSampler::new(anim, fill, color, char);
+
+        assert!(matches!(sampler.sample(0.7, Vector::new(0.3, 0.1)), Sample::Keep));
     }
 
     #[test]
     fn sample_draw() {
-        assert!(matches!(create_sampler().sample(0.4, Vector::new(0.1, 0.1)), Sample::Draw { char: '6', color: Color::Green }));
+        let mut anim = Box::new(MockAnimation::new());
+        let mut fill = Box::new(MockFillMode::new());
+        let mut color = Box::new(MockColorSampler::new());
+        let mut char = Box::new(MockCharSampler::new());
+
+        anim.expect_sample().once().with(eq(0.2), always()).return_const(0.3);
+        fill.expect_sample().once().with(eq(0.3), always()).return_const(0.8);
+        color.expect_sample().once().with(eq(0.8)).return_const(Color::Blue);
+        char.expect_sample().once().with(eq(0.3)).return_const('Z');
+
+        let sampler = ComposedSampler::new(anim, fill, color, char);
+
+        assert!(matches!(sampler.sample(0.2, Vector::new(0.3, 0.1)), Sample::Draw { char: 'Z', color: Color::Blue }));
     }
 
     #[test]
     fn sample_clear() {
-        assert!(matches!(create_sampler().sample(-1.0, Vector::new(0.4, 0.5)), Sample::Clear));
+        let mut anim = Box::new(MockAnimation::new());
+        let fill = Box::new(MockFillMode::new());
+        let color = Box::new(MockColorSampler::new());
+        let char = Box::new(MockCharSampler::new());
+
+        anim.expect_sample().return_const(-0.4);
+
+        let sampler = ComposedSampler::new(anim, fill, color, char);
+
+        assert!(matches!(sampler.sample(0.7, Vector::new(0.3, 0.1)), Sample::Clear));
     }
 }

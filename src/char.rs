@@ -1,4 +1,7 @@
+use mockall::automock;
+
 /// Used to get a character with a given brightness.
+#[automock]
 pub trait CharSampler {
     /// Gets a character with the given brightness.
     /// # Arguments

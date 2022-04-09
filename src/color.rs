@@ -1,6 +1,8 @@
 use crossterm::style::Color;
+use mockall::automock;
 
 /// A collection of colors.
+#[automock]
 pub trait ColorSampler {
     /// Gets a color for the given fill.
     /// # Arguments
