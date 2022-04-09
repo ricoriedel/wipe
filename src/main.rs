@@ -35,23 +35,27 @@ mod timer;
 mod runner;
 mod choose;
 
-#[derive(Copy, Clone, ArgEnum)]
-enum AnimationType {
-    Circle,
-    Rhombus,
-    Rotation
-}
-
-impl Options for AnimationType {
-    fn all() -> Vec<Self> where Self: Sized {
-        use AnimationType::*;
-
-        vec![Circle, Rhombus, Rotation]
+macro_rules! options {
+    ($name:ident { $($opt:ident,)* }) => {
+        #[derive(Copy, Clone, ArgEnum)]
+        enum $name {
+            $($opt,)*
+        }
+        impl Options for $name {
+            fn all() -> Vec<Self> {
+                vec![$($name::$opt,)*]
+            }
+        }
     }
 }
 
-#[derive(Copy, Clone, ArgEnum)]
-enum ColorType {
+options!(AnimationType {
+    Circle,
+    Rhombus,
+    Rotation,
+});
+
+options!(ColorType {
     Red,
     Green,
     Blue,
@@ -60,33 +64,16 @@ enum ColorType {
     LightBlue,
     Grey,
     Rainbow,
-}
+});
 
-impl Options for ColorType {
-    fn all() -> Vec<Self> where Self: Sized {
-        use ColorType::*;
-
-        vec![Red, Green, Blue, LightRed, LightGreen, LightBlue, Grey, Rainbow]
-    }
-}
-
-#[derive(Copy, Clone, ArgEnum)]
-enum FillModeType {
+options!(FillModeType {
     Circle,
     Level,
-    Stripes
-}
-
-impl Options for FillModeType {
-    fn all() -> Vec<Self> where Self: Sized {
-        use FillModeType::*;
-
-        vec![Circle, Level]
-    }
-}
+    Stripes,
+});
 
 #[derive(Parser)]
-#[clap(author = env!("CARGO_PKG_AUTHORS"), version = env!("CARGO_PKG_VERSION"), about = env!("CARGO_PKG_DESCRIPTION"))]
+#[clap(author = env ! ("CARGO_PKG_AUTHORS"), version = env ! ("CARGO_PKG_VERSION"), about = env ! ("CARGO_PKG_DESCRIPTION"))]
 struct Args {
     #[clap(short, long, help = "Add animation", arg_enum)]
     animation: Vec<AnimationType>,
