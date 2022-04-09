@@ -1,4 +1,5 @@
 use std::io::stdout;
+use std::time::Duration;
 use anyhow::Error;
 use clap::Parser;
 use clap::ArgEnum;
@@ -11,8 +12,10 @@ use crate::fill::circle::CircleFillMode;
 use crate::fill::FillMode;
 use crate::fill::level::LevelFillMode;
 use crate::render::{Renderer, SamplerRenderer};
+use crate::runner::Runner;
 use crate::sampler::ComposedSampler;
 use crate::surface::WriteSurface;
+use crate::timer::SimpleTimer;
 use crate::vec::Vector;
 
 mod color;
@@ -24,6 +27,8 @@ mod surface;
 mod animation;
 mod sampler;
 mod render;
+mod timer;
+mod runner;
 
 #[derive(Copy, Clone, ArgEnum)]
 enum AnimationType {
@@ -81,12 +86,11 @@ fn main() -> Result<(), Error> {
     let sampler = Box::new(ComposedSampler::new(animation, fill, color, char));
     let surface = Box::new(WriteSurface::new(stdout(), width, height));
 
-    let mut renderer = Box::new(SamplerRenderer::new(surface, sampler));
+    let renderer = Box::new(SamplerRenderer::new(surface, sampler));
+    let timer = Box::new(SimpleTimer::new(Duration::from_millis(1000 / 60)));
+    let runner = Runner::new(Duration::from_secs(2), timer, renderer);
 
-    renderer.render(0.5);
-    renderer.present()?;
-
-    Ok(())
+    runner.run()
 }
 
 fn create_animation(animation: AnimationType, size: Vector) -> Box<dyn Animation> {
