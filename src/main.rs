@@ -54,7 +54,7 @@ enum FillModeType {
 }
 
 #[derive(Parser)]
-#[clap(author = "Rico Riedel", version = "0.1.0", about = "Wipe your terminal with a random animation.")]
+#[clap(author = env!("CARGO_PKG_AUTHORS"), version = env!("CARGO_PKG_VERSION"), about = env!("CARGO_PKG_DESCRIPTION"))]
 struct Args {
     #[clap(short, long, help = "Add animation", arg_enum)]
     animation: Vec<AnimationType>,

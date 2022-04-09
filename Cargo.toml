@@ -5,6 +5,7 @@ edition = "2021"
 license = "MIT"
 description = "Wipe your terminal with a random animation."
 repository = "https://github.com/ricoriedel/wipe"
+authors = ["Rico Riedel"]
 
 [dependencies]
 anyhow = "1.0"
