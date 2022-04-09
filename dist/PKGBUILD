@@ -1,0 +1,26 @@
+pkgname='terminal-wipe'
+pkgver='0.1.0'
+pkgrel='1'
+pkgdesc='Wipe your terminal with a random animation.'
+arch=('x86_64')
+url='https://github.com/ricoriedel/wipe'
+license=('MIT')
+makedepends=('rust')
+conflicts=('wipe')
+source=('git+https://www.github.com/ricoriedel/wipe.git')
+sha256sums=('SKIP')
+
+build() {
+    cd wipe
+    cargo build --release
+}
+
+check() {
+    cd wipe
+    cargo test --release
+}
+
+package() {
+    mkdir -p "$pkgdir/usr/bin"
+    mv 'wipe/target/release/wipe' "$pkgdir/usr/bin"
+}
