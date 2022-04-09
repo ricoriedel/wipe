@@ -9,19 +9,18 @@ pub trait Renderer {
     fn finish(&mut self) -> Result<(), Error>;
 }
 
-pub struct SamplerRenderer {
-    surface: Box<dyn Surface>,
-    sampler: Box<dyn Sampler>,
+pub struct SamplerRenderer<TSurface, TSampler> {
+    surface: TSurface,
+    sampler: TSampler,
 }
 
-impl SamplerRenderer {
-    pub fn new(surface: Box<dyn Surface>,
-               sampler: Box<dyn Sampler>) -> Self {
+impl<T1, T2> SamplerRenderer<T1, T2> {
+    pub fn new(surface: T1, sampler: T2) -> Self {
         Self { surface, sampler }
     }
 }
 
-impl Renderer for SamplerRenderer {
+impl<T1: Surface, T2: Sampler> Renderer for SamplerRenderer<T1, T2> {
     fn render(&mut self, step: f32) {
         for x in 0..self.surface.width() {
             for y in 0..self.surface.height() {
@@ -56,8 +55,8 @@ mod test {
 
     #[test]
     fn render() {
-        let mut surface = Box::new(MockSurface::new());
-        let mut sampler = Box::new(MockSampler::new());
+        let mut surface = MockSurface::new();
+        let mut sampler = MockSampler::new();
 
         sampler.expect_sample().withf(|_, pos| pos.x == 0.0 && pos.y == 0.0).returning(|_,_| Sample::Clear);
         sampler.expect_sample().withf(|_, pos| pos.x == 1.0 && pos.y == 0.0).returning(|_,_| Sample::Keep);
@@ -80,8 +79,8 @@ mod test {
 
     #[test]
     fn present() {
-        let mut surface = Box::new(MockSurface::new());
-        let sampler = Box::new(MockSampler::new());
+        let mut surface = MockSurface::new();
+        let sampler = MockSampler::new();
 
         surface.expect_present().once().returning(|| Ok(()));
 
@@ -92,8 +91,8 @@ mod test {
 
     #[test]
     fn finish() {
-        let mut surface = Box::new(MockSurface::new());
-        let sampler = Box::new(MockSampler::new());
+        let mut surface = MockSurface::new();
+        let sampler = MockSampler::new();
 
         surface.expect_finish().once().returning(|| Ok(()));
 

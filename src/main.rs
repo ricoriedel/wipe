@@ -83,11 +83,11 @@ fn main() -> Result<(), Error> {
     let color = create_color(args.color[0]);
     let char = Box::new(SimpleCharSampler::new(args.chars));
 
-    let sampler = Box::new(ComposedSampler::new(animation, fill, color, char));
-    let surface = Box::new(WriteSurface::new(stdout(), width, height));
+    let sampler = ComposedSampler::new(animation, fill, color, char);
+    let surface =WriteSurface::new(stdout(), width, height);
 
-    let renderer = Box::new(SamplerRenderer::new(surface, sampler));
-    let timer = Box::new(SimpleTimer::new(Duration::from_millis(1000 / 60)));
+    let renderer = SamplerRenderer::new(surface, sampler);
+    let timer = SimpleTimer::new(Duration::from_millis(1000 / 60));
     let runner = Runner::new(Duration::from_secs(2), timer, renderer);
 
     runner.run()

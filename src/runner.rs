@@ -3,16 +3,16 @@ use anyhow::Error;
 use crate::Renderer;
 use crate::timer::Timer;
 
-pub struct Runner {
-    timer: Box<dyn Timer>,
+pub struct Runner<TTimer, TRenderer> {
+    timer: TTimer,
     ticks: u128,
-    renderer: Box<dyn Renderer>,
+    renderer: TRenderer,
 }
 
-impl Runner {
+impl<T1: Timer, T2: Renderer> Runner<T1, T2> {
     pub fn new(duration: Duration,
-               timer: Box<dyn Timer>,
-               renderer: Box<dyn Renderer>) -> Self {
+               timer: T1,
+               renderer: T2) -> Self {
         let ticks = duration.as_nanos() / timer.delay().as_nanos();
 
         Self { timer, ticks, renderer }
