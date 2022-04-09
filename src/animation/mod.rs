@@ -1,4 +1,4 @@
-mod circle;
+pub mod circle;
 
 use crate::vec::Vector;
 

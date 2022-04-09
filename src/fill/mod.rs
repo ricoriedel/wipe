@@ -1,5 +1,5 @@
-mod level;
-mod circle;
+pub mod level;
+pub mod circle;
 
 use crate::vec::Vector;
 
