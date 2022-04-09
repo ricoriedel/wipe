@@ -37,9 +37,9 @@ impl Sampler for ComposedSampler {
     fn sample(&self, step: f32, pos: Vector) -> Sample {
         let level = self.animation.sample(step, pos);
 
-        if level > 1.0 {
+        if level >= 1.0 {
             Sample::Keep
-        } else if level > 0.0 {
+        } else if level >= 0.0 {
             let char = self.char.sample(level);
             let fill = self.fill.sample(level, pos);
             let color = self.color.sample(fill);
@@ -103,5 +103,37 @@ mod test {
         let sampler = ComposedSampler::new(anim, fill, color, char);
 
         assert!(matches!(sampler.sample(0.7, Vector::new(0.3, 0.1)), Sample::Clear));
+    }
+
+    #[test]
+    fn sample_almost_draw() {
+        let mut anim = Box::new(MockAnimation::new());
+        let fill = Box::new(MockFillMode::new());
+        let color = Box::new(MockColorSampler::new());
+        let char = Box::new(MockCharSampler::new());
+
+        anim.expect_sample().return_const(1.0);
+
+        let sampler = ComposedSampler::new(anim, fill, color, char);
+
+        assert!(matches!(sampler.sample(0.7, Vector::new(0.3, 0.1)), Sample::Keep));
+    }
+
+
+    #[test]
+    fn sample_almost_clear() {
+        let mut anim = Box::new(MockAnimation::new());
+        let mut fill = Box::new(MockFillMode::new());
+        let mut color = Box::new(MockColorSampler::new());
+        let mut char = Box::new(MockCharSampler::new());
+
+        anim.expect_sample().return_const(0.0);
+        fill.expect_sample().return_const(0.8);
+        color.expect_sample().return_const(Color::Blue);
+        char.expect_sample().return_const('a');
+
+        let sampler = ComposedSampler::new(anim, fill, color, char);
+
+        assert!(matches!(sampler.sample(0.7, Vector::new(0.3, 0.1)), Sample::Draw { .. }));
     }
 }

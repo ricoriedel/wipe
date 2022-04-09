@@ -22,9 +22,9 @@ impl SimpleColorSampler {
 
 impl ColorSampler for SimpleColorSampler {
     fn sample(&self, fill: f32) -> Color {
-        let index = self.values.len() as f32 * fill;
+        assert!(0.0 <= fill && fill < 1.0);
 
-        assert!(index >= 0.0);
+        let index = self.values.len() as f32 * fill;
 
         self.values[index as usize]
     }

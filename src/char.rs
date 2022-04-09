@@ -23,9 +23,9 @@ impl SimpleCharSampler {
 
 impl CharSampler for SimpleCharSampler {
     fn sample(&self, level: f32) -> char {
-        let index = level * self.chars.chars().count() as f32;
+        assert!(0.0 <= level && level < 1.0);
 
-        assert!(index >= 0.0);
+        let index = level * self.chars.chars().count() as f32;
 
         self.chars.chars().nth(index as usize).unwrap()
     }
