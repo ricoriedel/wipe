@@ -10,6 +10,7 @@ use crate::color::{ColorSampler, SimpleColorSampler};
 use crate::fill::circle::CircleFillMode;
 use crate::fill::FillMode;
 use crate::fill::level::LevelFillMode;
+use crate::render::{Renderer, SamplerRenderer};
 use crate::sampler::ComposedSampler;
 use crate::surface::WriteSurface;
 use crate::vec::Vector;
@@ -22,6 +23,7 @@ mod array;
 mod surface;
 mod animation;
 mod sampler;
+mod render;
 
 #[derive(Copy, Clone, ArgEnum)]
 enum AnimationType {
@@ -76,8 +78,13 @@ fn main() -> Result<(), Error> {
     let color = create_color(args.color[0]);
     let char = Box::new(SimpleCharSampler::new(args.chars));
 
-    let _ = Box::new(ComposedSampler::new(animation, fill, color, char));
-    let _ = Box::new(WriteSurface::new(stdout(), width, height));
+    let sampler = Box::new(ComposedSampler::new(animation, fill, color, char));
+    let surface = Box::new(WriteSurface::new(stdout(), width, height));
+
+    let mut renderer = Box::new(SamplerRenderer::new(surface, sampler));
+
+    renderer.render(0.5);
+    renderer.present()?;
 
     Ok(())
 }

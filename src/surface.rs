@@ -3,9 +3,11 @@ use crossterm::cursor::MoveTo;
 use crossterm::{ExecutableCommand, QueueableCommand};
 use crossterm::style::{Color, Print, SetForegroundColor};
 use crossterm::terminal::{Clear, ClearType};
+use mockall::automock;
 use std::io::Write;
 use crate::array::Array2D;
 
+#[automock]
 pub trait Surface {
     fn width(&self) -> usize;
     fn height(&self) -> usize;
