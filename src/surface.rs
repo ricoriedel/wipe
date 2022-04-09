@@ -14,6 +14,7 @@ pub trait Surface {
     fn draw(&mut self, x: usize, y: usize, char: char, color: Color);
     fn clear(&mut self, x: usize, y: usize);
     fn present(&mut self) -> Result<(), Error>;
+    fn finish(&mut self) -> Result<(), Error>;
 }
 
 pub struct WriteSurface<T: Write> {
@@ -88,11 +89,10 @@ impl<T: Write> Surface for WriteSurface<T> {
         self.out.flush()?;
         Ok(())
     }
-}
 
-impl<T: Write> Drop for WriteSurface<T> {
-    fn drop(&mut self) {
-        self.out.execute(Clear(ClearType::Purge)).unwrap();
+    fn finish(&mut self) -> Result<(), Error> {
+        self.out.execute(Clear(ClearType::Purge))?;
+        Ok(())
     }
 }
 
@@ -160,13 +160,13 @@ mod test {
     }
 
     #[test]
-    fn purge() {
+    fn finish() {
         // Execute
         let data = Data::new();
         let mock = MockWrite::new(data.clone());
-        let renderer = WriteSurface::new(mock, 4, 4);
+        let mut renderer = WriteSurface::new(mock, 4, 4);
 
-        drop(renderer);
+        renderer.finish().unwrap();
 
         // Recreate expectation
         let expected = Data::new();

@@ -6,6 +6,7 @@ use crate::Vector;
 pub trait Renderer {
     fn render(&mut self, step: f32);
     fn present(&mut self) -> Result<(), Error>;
+    fn finish(&mut self) -> Result<(), Error>;
 }
 
 pub struct SamplerRenderer {
@@ -38,6 +39,10 @@ impl Renderer for SamplerRenderer {
 
     fn present(&mut self) -> Result<(), Error> {
         self.surface.present()
+    }
+
+    fn finish(&mut self) -> Result<(), Error> {
+        self.surface.finish()
     }
 }
 
@@ -83,5 +88,17 @@ mod test {
         let mut renderer = SamplerRenderer::new(surface, sampler);
 
         renderer.present().unwrap();
+    }
+
+    #[test]
+    fn finish() {
+        let mut surface = Box::new(MockSurface::new());
+        let sampler = Box::new(MockSampler::new());
+
+        surface.expect_finish().once().returning(|| Ok(()));
+
+        let mut renderer = SamplerRenderer::new(surface, sampler);
+
+        renderer.finish().unwrap();
     }
 }
