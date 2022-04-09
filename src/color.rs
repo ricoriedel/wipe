@@ -1,5 +1,4 @@
 use crossterm::style::Color;
-use crossterm::style::Color::*;
 
 /// A collection of colors.
 pub trait ColorSampler {
@@ -31,6 +30,7 @@ impl ColorSampler for SimpleColorSampler {
 
 #[cfg(test)]
 mod test {
+    use crossterm::style::Color::*;
     use super::*;
 
     #[test]

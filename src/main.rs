@@ -1,13 +1,17 @@
+use std::io::stdout;
 use anyhow::Error;
 use clap::Parser;
 use clap::ArgEnum;
 use crossterm::style::Color::*;
 use crate::animation::Animation;
 use crate::animation::circle::CircleAnimation;
+use crate::char::SimpleCharSampler;
 use crate::color::{ColorSampler, SimpleColorSampler};
 use crate::fill::circle::CircleFillMode;
 use crate::fill::FillMode;
 use crate::fill::level::LevelFillMode;
+use crate::sampler::ComposedSampler;
+use crate::surface::WriteSurface;
 use crate::vec::Vector;
 
 mod color;
@@ -70,6 +74,10 @@ fn main() -> Result<(), Error> {
     let animation = create_animation(args.animation[0], size);
     let fill = create_fill(args.fill[0], size);
     let color = create_color(args.color[0]);
+    let char = Box::new(SimpleCharSampler::new(args.chars));
+
+    let _ = Box::new(ComposedSampler::new(animation, fill, color, char));
+    let _ = Box::new(WriteSurface::new(stdout(), width, height));
 
     Ok(())
 }
