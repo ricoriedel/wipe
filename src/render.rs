@@ -3,6 +3,9 @@ use crate::sampler::{Sample, Sampler};
 use crate::surface::Surface;
 use crate::Vector;
 
+use mockall::automock;
+
+#[automock]
 pub trait Renderer {
     fn render(&mut self, step: f32);
     fn present(&mut self) -> Result<(), Error>;
