@@ -12,10 +12,9 @@ pub trait Surface {
     fn draw(&mut self, x: usize, y: usize, char: char, color: Color);
     fn clear(&mut self, x: usize, y: usize);
     fn present(&mut self) -> Result<(), Error>;
-    fn purge(&mut self) -> Result<(), Error>;
 }
 
-pub struct WriteSurface<T> {
+pub struct WriteSurface<T: Write> {
     out: T,
     array: Array2D<Cell>,
 }
@@ -31,7 +30,7 @@ impl Default for Cell {
     fn default() -> Self { Cell::Keep }
 }
 
-impl<T> WriteSurface<T> {
+impl<T: Write> WriteSurface<T> {
     pub fn new(out: T, width: usize, height: usize) -> Self {
         Self {
             out,
@@ -87,10 +86,11 @@ impl<T: Write> Surface for WriteSurface<T> {
         self.out.flush()?;
         Ok(())
     }
+}
 
-    fn purge(&mut self) -> Result<(), Error> {
-        self.out.execute(Clear(ClearType::Purge))?;
-        Ok(())
+impl<T: Write> Drop for WriteSurface<T> {
+    fn drop(&mut self) {
+        self.out.execute(Clear(ClearType::Purge)).unwrap();
     }
 }
 
@@ -162,9 +162,9 @@ mod test {
         // Execute
         let data = Data::new();
         let mock = MockWrite::new(data.clone());
-        let mut renderer = WriteSurface::new(mock, 4, 4);
+        let renderer = WriteSurface::new(mock, 4, 4);
 
-        renderer.purge().unwrap();
+        drop(renderer);
 
         // Recreate expectation
         let expected = Data::new();
