@@ -6,12 +6,15 @@ use clap::ArgEnum;
 use rand::rngs::OsRng;
 use crate::animation::Animation;
 use crate::animation::circle::CircleAnimation;
+use crate::animation::rhombus::RhombusAnimation;
+use crate::animation::rotation::RotationAnimation;
 use crate::char::SimpleCharSampler;
 use crate::choose::{Chooser, Options};
 use crate::color::{ColorSampler, SimpleColorSampler};
 use crate::fill::circle::CircleFillMode;
 use crate::fill::FillMode;
 use crate::fill::level::LevelFillMode;
+use crate::fill::stripes::StripesFillMode;
 use crate::render::{Renderer, SamplerRenderer};
 use crate::runner::Runner;
 use crate::sampler::ComposedSampler;
@@ -34,14 +37,16 @@ mod choose;
 
 #[derive(Copy, Clone, ArgEnum)]
 enum AnimationType {
-    Circle
+    Circle,
+    Rhombus,
+    Rotation
 }
 
 impl Options for AnimationType {
     fn all() -> Vec<Self> where Self: Sized {
         use AnimationType::*;
 
-        vec![Circle]
+        vec![Circle, Rhombus, Rotation]
     }
 }
 
@@ -68,7 +73,8 @@ impl Options for ColorType {
 #[derive(Copy, Clone, ArgEnum)]
 enum FillModeType {
     Circle,
-    Level
+    Level,
+    Stripes
 }
 
 impl Options for FillModeType {
@@ -128,7 +134,9 @@ fn main() -> Result<(), Error> {
 
 fn create_animation(animation: AnimationType, size: Vector) -> Box<dyn Animation> {
     match animation {
-        AnimationType::Circle => Box::new(CircleAnimation::new(size))
+        AnimationType::Circle => Box::new(CircleAnimation::new(size)),
+        AnimationType::Rhombus => Box::new(RhombusAnimation::new(size)),
+        AnimationType::Rotation => Box::new(RotationAnimation::new(size)),
     }
 }
 
@@ -136,6 +144,7 @@ fn create_fill(fill: FillModeType, size: Vector) -> Box<dyn FillMode> {
     match fill {
         FillModeType::Circle => Box::new(CircleFillMode::new(size)),
         FillModeType::Level => Box::new(LevelFillMode::new()),
+        FillModeType::Stripes => Box::new(StripesFillMode::new(size))
     }
 }
 

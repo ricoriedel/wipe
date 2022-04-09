@@ -1,5 +1,6 @@
 pub mod level;
 pub mod circle;
+pub mod stripes;
 
 use crate::vec::Vector;
 

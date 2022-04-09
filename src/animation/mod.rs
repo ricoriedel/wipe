@@ -1,4 +1,6 @@
 pub mod circle;
+pub mod rotation;
+pub mod rhombus;
 
 use crate::vec::Vector;
 

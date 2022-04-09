@@ -20,8 +20,20 @@ impl Vector {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 
+    pub fn angle(self) -> f32 {
+        self.x.atan2(self.y)
+    }
+
     pub fn smaller(self) -> f32 {
         self.x.min(self.y)
+    }
+
+    pub fn abs(self) -> Vector {
+        Self::new(self.x.abs(), self.y.abs())
+    }
+
+    pub fn sum(self) -> f32 {
+        self.x + self.y
     }
 
     /// Creates a vector with the on screen coordinates based on the terminal coordinates.
