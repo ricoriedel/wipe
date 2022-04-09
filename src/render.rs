@@ -9,7 +9,6 @@ use mockall::automock;
 pub trait Renderer {
     fn render(&mut self, step: f32);
     fn present(&mut self) -> Result<(), Error>;
-    fn finish(&mut self) -> Result<(), Error>;
 }
 
 pub struct SamplerRenderer<TSurface, TSampler> {
@@ -41,10 +40,6 @@ impl<T1: Surface, T2: Sampler> Renderer for SamplerRenderer<T1, T2> {
 
     fn present(&mut self) -> Result<(), Error> {
         self.surface.present()
-    }
-
-    fn finish(&mut self) -> Result<(), Error> {
-        self.surface.finish()
     }
 }
 
@@ -90,17 +85,5 @@ mod test {
         let mut renderer = SamplerRenderer::new(surface, sampler);
 
         renderer.present().unwrap();
-    }
-
-    #[test]
-    fn finish() {
-        let mut surface = MockSurface::new();
-        let sampler = MockSampler::new();
-
-        surface.expect_finish().once().returning(|| Ok(()));
-
-        let mut renderer = SamplerRenderer::new(surface, sampler);
-
-        renderer.finish().unwrap();
     }
 }

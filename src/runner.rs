@@ -26,7 +26,7 @@ impl<T1: Timer, T2: Renderer> Runner<T1, T2> {
             self.renderer.present()?;
             self.timer.sleep();
         }
-        self.renderer.finish()
+        Ok(())
     }
 }
 
@@ -58,8 +58,6 @@ mod test {
         renderer.expect_render().once().with(eq(1.0)).in_sequence(seq).return_const(());
         renderer.expect_present().once().in_sequence(seq).returning(|| Ok(()));
         timer.expect_sleep().once().in_sequence(seq).return_const(());
-
-        renderer.expect_finish().once().in_sequence(seq).returning(|| Ok(()));
 
         let runner = Runner::new(Duration::from_secs(4), timer, renderer);
 

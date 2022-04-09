@@ -14,7 +14,6 @@ pub trait Surface {
     fn draw(&mut self, x: usize, y: usize, char: char, color: Color);
     fn clear(&mut self, x: usize, y: usize);
     fn present(&mut self) -> Result<(), Error>;
-    fn finish(&mut self) -> Result<(), Error>;
 }
 
 pub struct WriteSurface<T: Write> {
@@ -89,10 +88,13 @@ impl<T: Write> Surface for WriteSurface<T> {
         self.out.flush()?;
         Ok(())
     }
+}
 
-    fn finish(&mut self) -> Result<(), Error> {
-        self.out.execute(Clear(ClearType::Purge))?;
-        Ok(())
+impl<T: Write> Drop for WriteSurface<T> {
+    fn drop(&mut self) {
+        if let Err(e) = self.out.execute(Clear(ClearType::Purge)) {
+            println!("{}", e);
+        }
     }
 }
 
@@ -157,25 +159,6 @@ mod test {
         let renderer = WriteSurface::new(mock, 5, 8);
 
         assert_eq!(8, renderer.height());
-    }
-
-    #[test]
-    fn finish() {
-        // Execute
-        let data = Data::new();
-        let mock = MockWrite::new(data.clone());
-        let mut renderer = WriteSurface::new(mock, 4, 4);
-
-        renderer.finish().unwrap();
-
-        // Recreate expectation
-        let expected = Data::new();
-        let mut stream = MockWrite::new(expected.clone());
-
-        stream.execute(Clear(ClearType::Purge)).unwrap();
-
-        // Compare
-        assert_eq!(expected, data);
     }
 
     #[test]
