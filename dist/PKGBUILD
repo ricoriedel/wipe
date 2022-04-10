@@ -1,4 +1,4 @@
-pkgname='terminal-wipe'
+pkgname='terminal-wipe-git'
 pkgver='0.1.0'
 pkgrel='1'
 pkgdesc='Wipe your terminal with a random animation.'
@@ -22,5 +22,7 @@ check() {
 
 package() {
     mkdir -p "$pkgdir/usr/bin"
+    mkdir -p "$pkgdir/usr/share/licenses/$pkgname"
     mv 'wipe/target/release/wipe' "$pkgdir/usr/bin"
+    mv 'wipe/LICENSE' "$pkgdir/usr/share/licenses/$pkgname"
 }
