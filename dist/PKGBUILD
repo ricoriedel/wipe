@@ -1,6 +1,6 @@
 pkgname='terminal-wipe-git'
-pkgver='0.1.0'
-pkgrel='1'
+pkgver='1.0.0'
+pkgrel='2'
 pkgdesc='Wipe your terminal with a random animation.'
 arch=('x86_64')
 url='https://github.com/ricoriedel/wipe'
