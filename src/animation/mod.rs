@@ -4,9 +4,10 @@ pub mod rhombus;
 
 use crate::vec::Vector;
 
+#[cfg(test)]
 use mockall::automock;
 
-#[automock]
+#[cfg_attr(test, automock)]
 pub trait Animation {
     fn sample(&self, step: f32, pos: Vector) -> f32;
 }

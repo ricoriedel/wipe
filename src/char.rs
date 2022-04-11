@@ -1,7 +1,8 @@
+#[cfg(test)]
 use mockall::automock;
 
 /// Used to get a character with a given brightness.
-#[automock]
+#[cfg_attr(test, automock)]
 pub trait CharSampler {
     /// Gets a character with the given brightness.
     /// # Arguments

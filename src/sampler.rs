@@ -1,10 +1,12 @@
 use crossterm::style::Color;
-use mockall::automock;
 use crate::animation::Animation;
 use crate::char::CharSampler;
 use crate::color::ColorSampler;
 use crate::fill::FillMode;
 use crate::vec::Vector;
+
+#[cfg(test)]
+use mockall::automock;
 
 pub enum Sample {
     Keep,
@@ -12,7 +14,7 @@ pub enum Sample {
     Clear,
 }
 
-#[automock]
+#[cfg_attr(test, automock)]
 pub trait Sampler {
     fn sample(&self, step: f32, pos: Vector) -> Sample;
 }

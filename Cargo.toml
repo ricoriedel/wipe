@@ -14,4 +14,6 @@ anyhow = "1.0"
 clap = { version = "3.1", features = ["derive"]}
 crossterm = "0.23"
 rand = "0.8"
+
+[dev-dependencies]
 mockall = "0.11"

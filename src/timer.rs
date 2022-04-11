@@ -1,8 +1,10 @@
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+
+#[cfg(test)]
 use mockall::automock;
 
-#[automock]
+#[cfg_attr(test, automock)]
 pub trait Timer {
     fn sleep(&mut self);
 
