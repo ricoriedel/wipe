@@ -1,6 +1,6 @@
 use std::io::stdout;
 use std::time::Duration;
-use anyhow::Error;
+use anyhow::{anyhow, Error};
 use clap::Parser;
 use clap::ArgEnum;
 use rand::rngs::OsRng;
@@ -72,6 +72,8 @@ options!(FillModeType {
     Stripes,
 });
 
+const MAX_FPS: u64 = 480;
+
 #[derive(Parser)]
 #[clap(author = env ! ("CARGO_PKG_AUTHORS"), version = env ! ("CARGO_PKG_VERSION"), about = env ! ("CARGO_PKG_DESCRIPTION"))]
 struct Args {
@@ -81,11 +83,11 @@ struct Args {
     fill: Vec<FillModeType>,
     #[clap(short, long, help = "Add color pallet", arg_enum)]
     color: Vec<ColorType>,
-    #[clap(long, default_value = ".-+%#", help = "Set chars")]
+    #[clap(long, default_value = ".-+%#", parse(try_from_str = validate_chars), help = "Set chars")]
     chars: String,
-    #[clap(long, default_value = "30", help = "Set frames per second")]
+    #[clap(long, default_value = "30", parse(try_from_str = validate_fps), help = "Set frames per second [max: 480]")]
     fps: u64,
-    #[clap(long, default_value = "1000", help = "Set duration [milliseconds]")]
+    #[clap(long, default_value = "1000", parse(try_from_str = validate_duration), help = "Set duration [milliseconds]")]
     duration: u64,
     #[clap(long, help = "Set width [default: terminal width]")]
     width: Option<usize>,
@@ -97,11 +99,9 @@ fn main() -> Result<(), Error> {
     let args = Args::parse();
     let mut chooser = Chooser::new(OsRng::default());
 
-    let terminal = crossterm::terminal::size()?;
-    let width = args.width.unwrap_or(terminal.0 as usize);
-    let height = args.height.unwrap_or(terminal.1 as usize);
+    let (width, height) = size(crossterm::terminal::size()?, args.width, args.height);
     let size = Vector::from_terminal(width, height);
-    let delay = Duration::from_micros(1_000_000 / args.fps);
+    let delay = delay_of_fps(args.fps);
     let duration = Duration::from_millis(args.duration);
 
     let animation = create_animation(chooser.choose(args.animation), size);
@@ -117,6 +117,46 @@ fn main() -> Result<(), Error> {
     let runner = Runner::new(duration, timer, renderer);
 
     runner.run()
+}
+
+fn validate_chars(text: &str) -> Result<String, Error> {
+    if text.is_empty() {
+        Err(anyhow!("can't be empty."))
+    } else {
+        Ok(text.to_string())
+    }
+}
+
+fn validate_fps(text: &str) -> Result<u64, Error> {
+    let value = text.parse()?;
+
+    if value > MAX_FPS {
+        Err(anyhow!("value is above limit of {}.", MAX_FPS))
+    } else if value == 0 {
+        Err(anyhow!("value is zero."))
+    } else {
+        Ok(value)
+    }
+}
+
+fn validate_duration(text: &str) -> Result<u64, Error> {
+    let value = text.parse()?;
+
+    if value == 0 {
+        Err(anyhow!("value is zero."))
+    } else {
+        Ok(value)
+    }
+}
+
+fn size(terminal: (u16, u16), width: Option<usize>, height: Option<usize>) -> (usize, usize) {
+    let width = width.unwrap_or(terminal.0 as usize);
+    let height = height.unwrap_or(terminal.1 as usize);
+    (width, height)
+}
+
+fn delay_of_fps(fps: u64) -> Duration {
+    Duration::from_micros(1_000_000 / fps)
 }
 
 fn create_animation(animation: AnimationType, size: Vector) -> Box<dyn Animation> {
