@@ -1,28 +1,37 @@
+# Maintainer: Rico Riedel <rico.riedel@protonmail.ch>
+
 pkgname='terminal-wipe-git'
 pkgver='1.0.0'
-pkgrel='2'
+pkgrel='3'
 pkgdesc='Wipe your terminal with a random animation.'
 arch=('x86_64')
 url='https://github.com/ricoriedel/wipe'
 license=('MIT')
-makedepends=('rust')
+makedepends=('cargo')
 conflicts=('wipe')
 source=('git+https://www.github.com/ricoriedel/wipe.git')
 sha256sums=('SKIP')
 
+prepare() {
+    cd wipe
+    cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
 build() {
     cd wipe
-    cargo build --release
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --frozen --release --all-features
 }
 
 check() {
     cd wipe
-    cargo test --release
+    export RUSTUP_TOOLCHAIN=stable
+    cargo test --frozen --all-features
 }
 
 package() {
-    mkdir -p "$pkgdir/usr/bin"
-    mkdir -p "$pkgdir/usr/share/licenses/$pkgname"
-    mv 'wipe/target/release/wipe' "$pkgdir/usr/bin"
-    mv 'wipe/LICENSE' "$pkgdir/usr/share/licenses/$pkgname"
+    cd wipe
+    install -Dm0644 -t "$pkgdir/usr/share/licenses/$pkgname/" 'LICENSE'
+    install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/wipe"
 }
