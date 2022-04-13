@@ -156,7 +156,7 @@ fn size(terminal: (u16, u16), width: Option<usize>, height: Option<usize>) -> (u
 }
 
 fn delay_of_fps(fps: u64) -> Duration {
-    Duration::from_micros(1_000_000 / fps)
+    Duration::from_nanos(1_000_000_000 / fps)
 }
 
 fn create_animation(animation: AnimationType, size: Vector) -> Box<dyn Animation> {
@@ -187,5 +187,95 @@ fn create_color(color: ColorType) -> Box<dyn ColorSampler> {
         ColorType::LightBlue => Box::new(SimpleColorSampler::new(vec![White, Blue, Magenta])),
         ColorType::Grey => Box::new(SimpleColorSampler::new(vec![Black, Grey, White])),
         ColorType::Rainbow => Box::new(SimpleColorSampler::new(vec![Magenta, Blue, Green, Yellow, Red]))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn validate_chars_some_string() {
+        assert_eq!("abc", &validate_chars("abc").unwrap());
+    }
+
+    #[test]
+    fn validate_chars_empty() {
+        assert!(validate_chars("").is_err());
+    }
+
+    #[test]
+    fn validate_fps_some_string() {
+        assert_eq!(35, validate_fps("35").unwrap());
+    }
+
+    #[test]
+    fn validate_fps_zero() {
+        assert!(validate_fps("0").is_err());
+    }
+
+    #[test]
+    fn validate_fps_above_max() {
+        assert!(validate_fps("500").is_err());
+    }
+
+    #[test]
+    fn validate_duration_some_string() {
+        assert_eq!(500, validate_duration("500").unwrap());
+    }
+
+    #[test]
+    fn validate_duration_zero() {
+        assert!(validate_duration("0").is_err());
+    }
+
+    #[test]
+    fn size_not_set() {
+        assert_eq!((4, 6), size((4, 6), None, None));
+    }
+
+    #[test]
+    fn size_width_set() {
+        assert_eq!((8, 3), size((2, 3), Some(8), None));
+    }
+
+    #[test]
+    fn size_height_set() {
+        assert_eq!((1, 6), size((1, 7), None, Some(6)));
+    }
+
+    #[test]
+    fn delay_of_fps_some_number() {
+        assert_eq!(Duration::from_nanos(10_526_315), delay_of_fps(95));
+    }
+
+    #[test]
+    fn create_animation_all_implemented() {
+        let size = Vector::new(0.0, 0.0);
+
+        create_animation(AnimationType::Circle, size);
+        create_animation(AnimationType::Rhombus, size);
+        create_animation(AnimationType::Rotation, size);
+    }
+
+    #[test]
+    fn create_fill_all_implemented() {
+        let size = Vector::new(0.0, 0.0);
+
+        create_fill(FillModeType::Circle, size);
+        create_fill(FillModeType::Level, size);
+        create_fill(FillModeType::Stripes, size);
+    }
+
+    #[test]
+    fn create_color_all_implemented() {
+        create_color(ColorType::Red);
+        create_color(ColorType::Green);
+        create_color(ColorType::Blue);
+        create_color(ColorType::LightRed);
+        create_color(ColorType::LightGreen);
+        create_color(ColorType::LightBlue);
+        create_color(ColorType::Grey);
+        create_color(ColorType::Rainbow);
     }
 }
