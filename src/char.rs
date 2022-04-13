@@ -11,6 +11,7 @@ pub trait CharSampler {
 }
 
 pub struct SimpleCharSampler {
+    len: f32,
     chars: String
 }
 
@@ -18,7 +19,9 @@ impl SimpleCharSampler {
     /// # Arguments
     /// * `chars`: The characters ordered by brightness.
     pub fn new(chars: String) -> Self {
-        Self { chars }
+        let len = chars.chars().count() as f32;
+
+        Self { chars, len }
     }
 }
 
@@ -26,7 +29,7 @@ impl CharSampler for SimpleCharSampler {
     fn sample(&self, level: f32) -> char {
         assert!(0.0 <= level && level < 1.0);
 
-        let index = level * self.chars.chars().count() as f32;
+        let index = level * self.len;
 
         self.chars.chars().nth(index as usize).unwrap()
     }
