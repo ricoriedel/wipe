@@ -9,7 +9,7 @@ use crate::animation::circle::CircleAnimation;
 use crate::animation::rhombus::RhombusAnimation;
 use crate::animation::rotation::RotationAnimation;
 use crate::char::SimpleCharSampler;
-use crate::choose::{Chooser, Options};
+use crate::choose::{Chooser, Collection};
 use crate::color::{ColorSampler, SimpleColorSampler};
 use crate::fill::circle::CircleFillMode;
 use crate::fill::FillMode;
@@ -41,7 +41,7 @@ macro_rules! options {
         enum $name {
             $($opt,)*
         }
-        impl Options for $name {
+        impl Collection for $name {
             fn all() -> Vec<Self> {
                 vec![$($name::$opt,)*]
             }

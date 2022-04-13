@@ -1,7 +1,7 @@
 use rand::prelude::IteratorRandom;
 use rand::Rng;
 
-pub trait Options {
+pub trait Collection {
     fn all() -> Vec<Self>  where Self: Sized;
 }
 
@@ -14,7 +14,7 @@ impl<TRng: Rng> Chooser<TRng> {
         Self { rng }
     }
 
-    pub fn choose<TValue: Options>(&mut self, selection: Vec<TValue>) -> TValue {
+    pub fn choose<TValue: Collection>(&mut self, selection: Vec<TValue>) -> TValue {
         let options = if selection.is_empty() {
             TValue::all()
         } else {
@@ -27,7 +27,7 @@ impl<TRng: Rng> Chooser<TRng> {
 #[cfg(test)]
 mod test {
     use rand::rngs::mock::StepRng;
-    use crate::{Chooser, Options};
+    use crate::{Chooser, Collection};
 
     enum MockOptions {
         First,
@@ -35,7 +35,7 @@ mod test {
         Third
     }
 
-    impl Options for MockOptions {
+    impl Collection for MockOptions {
         fn all() -> Vec<Self> where Self: Sized {
             use MockOptions::*;
 
