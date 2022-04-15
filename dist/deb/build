@@ -3,8 +3,8 @@ set -e
 
 pkgname='wipe-terminal'
 version='1.0.0-3'
-maintainer='Maintainer: Rico Riedel <rico.riedel@protonmail.ch>'
-description='Description: Wipe your terminal with a random animation.'
+maintainer='Rico Riedel <rico.riedel@protonmail.ch>'
+description='Wipe your terminal with a random animation.'
 arch='x86_64'
 debarch='amd64'
 pkgdir="$PWD/$pkgname"
