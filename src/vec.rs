@@ -12,26 +12,32 @@ impl Vector {
         Self { x, y }
     }
 
+    /// Returns the halfway point.
     pub fn center(self) -> Self {
         Self::new(self.x / 2.0, self.y / 2.0)
     }
 
+    /// Returns the length.
     pub fn length(self) -> f32 {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 
+    /// Returns the angle.
     pub fn angle(self) -> f32 {
         self.x.atan2(self.y)
     }
 
+    /// Returns the value of the smaller axis.
     pub fn smaller(self) -> f32 {
         self.x.min(self.y)
     }
 
+    /// Converts all axis into positive values.
     pub fn abs(self) -> Vector {
         Self::new(self.x.abs(), self.y.abs())
     }
 
+    /// Returns the sum of all axis.
     pub fn sum(self) -> f32 {
         self.x + self.y
     }

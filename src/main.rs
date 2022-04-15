@@ -35,6 +35,7 @@ mod timer;
 mod runner;
 mod choose;
 
+/// Defines an enum and implements the [Collection] trait.
 macro_rules! options {
     ($name:ident { $($opt:ident,)* }) => {
         #[derive(Copy, Clone, ArgEnum)]
@@ -74,6 +75,7 @@ options!(FillModeType {
 
 const MAX_FPS: u64 = 480;
 
+/// The program arguments.
 #[derive(Parser)]
 #[clap(author = env ! ("CARGO_PKG_AUTHORS"), version = env ! ("CARGO_PKG_VERSION"), about = env ! ("CARGO_PKG_DESCRIPTION"))]
 struct Args {
@@ -119,6 +121,7 @@ fn main() -> Result<(), Error> {
     runner.run()
 }
 
+/// Validates the chars argument.
 fn validate_chars(text: &str) -> Result<String, Error> {
     if text.is_empty() {
         Err(anyhow!("can't be empty."))
@@ -127,6 +130,7 @@ fn validate_chars(text: &str) -> Result<String, Error> {
     }
 }
 
+/// Validates the fps argument.
 fn validate_fps(text: &str) -> Result<u64, Error> {
     let value = text.parse()?;
 
@@ -139,6 +143,7 @@ fn validate_fps(text: &str) -> Result<u64, Error> {
     }
 }
 
+/// Validates the duration argument.
 fn validate_duration(text: &str) -> Result<u64, Error> {
     let value = text.parse()?;
 
@@ -149,12 +154,14 @@ fn validate_duration(text: &str) -> Result<u64, Error> {
     }
 }
 
+/// Returns the size to use based on the terminal size and width and height arguments.
 fn size(terminal: (u16, u16), width: Option<usize>, height: Option<usize>) -> (usize, usize) {
     let width = width.unwrap_or(terminal.0 as usize);
     let height = height.unwrap_or(terminal.1 as usize);
     (width, height)
 }
 
+/// Calculates the delay between frames based on the fps.
 fn delay_of_fps(fps: u64) -> Duration {
     Duration::from_nanos(1_000_000_000 / fps)
 }

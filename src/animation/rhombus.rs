@@ -4,6 +4,7 @@ use crate::vec::Vector;
 const THICKNESS: f32 = 0.2;
 const FINAL_DISTANCE: f32 = 1.0 + THICKNESS * 2.0;
 
+/// An animation of an expanding rhombus.
 pub struct RhombusAnimation {
     center: Vector,
     thickness: f32,

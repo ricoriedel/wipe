@@ -6,12 +6,17 @@ use crate::Vector;
 #[cfg(test)]
 use mockall::automock;
 
+/// A trait for anything which performs some rendering.
 #[cfg_attr(test, automock)]
 pub trait Renderer {
+    /// Render the frame.
     fn render(&mut self, step: f32);
+
+    /// Present the finished frame.
     fn present(&mut self) -> Result<(), Error>;
 }
 
+/// Fills its [Surface] with the values received from a [Sampler].
 pub struct SamplerRenderer<TSurface, TSampler> {
     surface: TSurface,
     sampler: TSampler,

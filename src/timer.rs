@@ -4,13 +4,17 @@ use std::time::{Duration, Instant};
 #[cfg(test)]
 use mockall::automock;
 
+/// Allows for periodic execution of code.
 #[cfg_attr(test, automock)]
 pub trait Timer {
+    /// Sleep until the next tick starts.
     fn sleep(&mut self);
 
+    /// Get the delay between ticks.
     fn delay(&self) -> Duration;
 }
 
+/// A simple [Timer] based on the system clock.
 pub struct SimpleTimer {
     delay: Duration,
     last: Instant

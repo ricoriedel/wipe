@@ -3,6 +3,7 @@ use crate::vec::Vector;
 
 const INTERVAL: f32 = 4.0;
 
+/// Fill based on rings of a circle.
 pub struct CircleFillMode {
     center: Vector,
     interval: f32

@@ -1,10 +1,13 @@
 use rand::prelude::IteratorRandom;
 use rand::Rng;
 
+/// A trait to get all values of an enum.
 pub trait Collection {
+    /// Returns a list of all enum values.
     fn all() -> Vec<Self>  where Self: Sized;
 }
 
+/// Choose a enum from a list of options.
 pub struct Chooser<TRng> {
     rng: TRng
 }
@@ -14,6 +17,8 @@ impl<TRng: Rng> Chooser<TRng> {
         Self { rng }
     }
 
+    /// Choose an enum item from the provided [Vec].
+    /// If none are provided, a random one of all enum values is chosen.
     pub fn choose<TValue: Collection>(&mut self, selection: Vec<TValue>) -> TValue {
         let options = if selection.is_empty() {
             TValue::all()

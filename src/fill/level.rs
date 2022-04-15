@@ -1,6 +1,7 @@
 use crate::fill::FillMode;
 use crate::vec::Vector;
 
+/// Fill based on the level of brightness.
 pub struct LevelFillMode;
 
 impl LevelFillMode {

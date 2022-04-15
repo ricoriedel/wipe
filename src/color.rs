@@ -12,6 +12,7 @@ pub trait ColorSampler {
     fn sample(&self, fill: f32) -> Color;
 }
 
+/// A simple color sampler which interpolates the color from a [Vec].
 pub struct SimpleColorSampler {
     values: Vec<Color>
 }

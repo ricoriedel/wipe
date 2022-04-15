@@ -3,6 +3,7 @@ use crate::vec::Vector;
 
 const INTERVAL: f32 = 4.0;
 
+/// Fill based on diagonal stripes.
 pub struct StripesFillMode {
     interval: f32
 }

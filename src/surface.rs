@@ -9,20 +9,27 @@ use crate::array::Array2D;
 #[cfg(test)]
 use mockall::automock;
 
+/// A surface to draw characters on.
 #[cfg_attr(test, automock)]
 pub trait Surface {
     fn width(&self) -> usize;
     fn height(&self) -> usize;
+
+    /// Overwrite the character on screen with this value.
     fn draw(&mut self, x: usize, y: usize, char: char, color: Color);
+
+    /// Clear the character on screen.
     fn clear(&mut self, x: usize, y: usize);
+
+    /// Present the finished frame.
     fn present(&mut self) -> Result<(), Error>;
 }
 
+/// Renders the frames into a [Write] struct.
 pub struct WriteSurface<T: Write> {
     out: T,
     array: Array2D<Cell>,
 }
-
 
 #[derive(Copy, Clone)]
 enum Cell {

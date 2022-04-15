@@ -8,17 +8,23 @@ use crate::vec::Vector;
 #[cfg(test)]
 use mockall::automock;
 
+/// The action to perform for the given values.
 pub enum Sample {
     Keep,
     Draw { char: char, color: Color },
     Clear,
 }
 
+/// Provides a [Sample] for some values.
 #[cfg_attr(test, automock)]
 pub trait Sampler {
+    /// Get a [Sample] for the step of the animation and position on screen.
+    /// # Arguments
+    /// * `step`: `0 <= step` and `step <= 1`
     fn sample(&self, step: f32, pos: Vector) -> Sample;
 }
 
+/// Links primitive samplers into a full [Sampler].
 pub struct ComposedSampler {
     animation: Box<dyn Animation>,
     fill: Box<dyn FillMode>,

@@ -3,6 +3,7 @@ use anyhow::Error;
 use crate::Renderer;
 use crate::timer::Timer;
 
+/// Periodically calls [Renderer::render] and [Renderer::present].
 pub struct Runner<TTimer, TRenderer> {
     timer: TTimer,
     ticks: u128,
