@@ -1,6 +1,6 @@
 # Maintainer: Rico Riedel <rico.riedel@protonmail.ch>
 
-pkgname='terminal-wipe-git'
+pkgname='wipe-terminal-git'
 pkgver='1.0.0'
 pkgrel='3'
 pkgdesc='Wipe your terminal with a random animation.'
