@@ -2,7 +2,7 @@
 set -e
 
 pkgname='wipe-terminal'
-version='1.0.0-3'
+version='1.0.1-4'
 maintainer='Rico Riedel <rico.riedel@protonmail.ch>'
 description='Wipe your terminal with a random animation.'
 arch='x86_64'
