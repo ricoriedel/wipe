@@ -1,4 +1,6 @@
-# Don't forget to update PKGBUILD
+# Don't forget to update
+# - dist/arch/PKGBUILD
+# - dist/deb/build
 
 [package]
 name = "wipe"
