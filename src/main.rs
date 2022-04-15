@@ -7,7 +7,7 @@ use rand::rngs::OsRng;
 use crate::animation::Animation;
 use crate::animation::circle::CircleAnimation;
 use crate::animation::rhombus::RhombusAnimation;
-use crate::animation::rotation::RotationAnimation;
+use crate::animation::sonar::SonarAnimation;
 use crate::char::SimpleCharSampler;
 use crate::choose::{Chooser, Collection};
 use crate::color::{ColorSampler, SimpleColorSampler};
@@ -53,7 +53,7 @@ macro_rules! options {
 options!(AnimationType {
     Circle,
     Rhombus,
-    Rotation,
+    Sonar,
 });
 
 options!(ColorType {
@@ -170,7 +170,7 @@ fn create_animation(animation: AnimationType, size: Vector) -> Box<dyn Animation
     match animation {
         AnimationType::Circle => Box::new(CircleAnimation::new(size)),
         AnimationType::Rhombus => Box::new(RhombusAnimation::new(size)),
-        AnimationType::Rotation => Box::new(RotationAnimation::new(size)),
+        AnimationType::Sonar => Box::new(SonarAnimation::new(size)),
     }
 }
 
@@ -262,7 +262,7 @@ mod test {
 
         create_animation(AnimationType::Circle, size);
         create_animation(AnimationType::Rhombus, size);
-        create_animation(AnimationType::Rotation, size);
+        create_animation(AnimationType::Sonar, size);
     }
 
     #[test]

@@ -15,4 +15,4 @@ Note that some parameters like `--color` can be specified multiple times with di
 ## Showcase
 [![Circle](doc/circle.gif)]()
 [![Rhombus](doc/rhombus.gif)]()
-[![Rotation](doc/rotation.gif)]()
+[![Rotation](doc/sonar.gif)]()

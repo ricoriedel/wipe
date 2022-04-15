@@ -6,11 +6,12 @@ const TWO_PI: f32 = PI * 2.0;
 const THICKNESS: f32 = TWO_PI * 0.1;
 const FULL_ROTATION: f32 = TWO_PI + THICKNESS * 2.0;
 
-pub struct RotationAnimation {
+/// A sonar like animation.
+pub struct SonarAnimation {
     center: Vector
 }
 
-impl RotationAnimation {
+impl SonarAnimation {
     pub fn new(size: Vector) -> Self {
         Self {
             center: size.center()
@@ -18,7 +19,7 @@ impl RotationAnimation {
     }
 }
 
-impl Animation for RotationAnimation {
+impl Animation for SonarAnimation {
     fn sample(&self, step: f32, pos: Vector) -> f32 {
         let angle = FULL_ROTATION * step - PI - THICKNESS;
         let pos_angle = (pos - self.center).angle();
@@ -33,7 +34,7 @@ mod test {
 
     #[test]
     fn sample() {
-        let anim = RotationAnimation::new(Vector::new(30.0, 10.0));
+        let anim = SonarAnimation::new(Vector::new(30.0, 10.0));
 
         let sample_1 = anim.sample(0.3, Vector::new(16.0, 3.0));
         let sample_2 = anim.sample(0.7, Vector::new(22.0, 2.0));

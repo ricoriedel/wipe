@@ -1,5 +1,5 @@
 pub mod circle;
-pub mod rotation;
+pub mod sonar;
 pub mod rhombus;
 
 use crate::vec::Vector;
