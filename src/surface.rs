@@ -156,18 +156,18 @@ mod test {
     fn width() {
         let data = Data::new();
         let mock = MockWrite::new(data);
-        let renderer = WriteSurface::new(mock, 10, 2);
+        let surface = WriteSurface::new(mock, 10, 2);
 
-        assert_eq!(10, renderer.width());
+        assert_eq!(10, surface.width());
     }
 
     #[test]
     fn height() {
         let data = Data::new();
         let mock = MockWrite::new(data);
-        let renderer = WriteSurface::new(mock, 5, 8);
+        let surface = WriteSurface::new(mock, 5, 8);
 
-        assert_eq!(8, renderer.height());
+        assert_eq!(8, surface.height());
     }
 
     #[test]
@@ -175,12 +175,12 @@ mod test {
         // Execute
         let data = Data::new();
         let mock = MockWrite::new(data.clone());
-        let mut renderer = WriteSurface::new(mock, 3, 2);
+        let mut surface = WriteSurface::new(mock, 3, 2);
 
-        renderer.draw(0, 0, 'A', Color::Green);
-        renderer.draw(1, 0, 'x', Color::Green);
-        renderer.clear(1, 1);
-        renderer.present().unwrap();
+        surface.draw(0, 0, 'A', Color::Green);
+        surface.draw(1, 0, 'x', Color::Green);
+        surface.clear(1, 1);
+        surface.present().unwrap();
 
         // Recreate expectation
         let expected = Data::new();
