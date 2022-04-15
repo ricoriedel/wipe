@@ -24,7 +24,7 @@ impl Vector {
 
     /// Returns the angle.
     pub fn angle(self) -> f32 {
-        self.x.atan2(self.y)
+        self.y.atan2(self.x)
     }
 
     /// Returns the value of the smaller axis.
@@ -84,6 +84,13 @@ mod test {
         let vec = Vector::new(3.0, 6.0);
 
         assert!(6.7 < vec.length() && vec.length() < 6.8);
+    }
+
+    #[test]
+    fn angle() {
+        let vec = Vector::new(3.0, 6.0);
+
+        assert!(1.1 < vec.angle() && vec.angle() < 1.2);
     }
 
     #[test]

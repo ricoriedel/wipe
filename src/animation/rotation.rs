@@ -35,12 +35,12 @@ mod test {
     fn sample() {
         let anim = RotationAnimation::new(Vector::new(30.0, 10.0));
 
-        let sample_1 = anim.sample(0.2, Vector::new(5.0, 16.0));
+        let sample_1 = anim.sample(0.3, Vector::new(16.0, 3.0));
         let sample_2 = anim.sample(0.7, Vector::new(22.0, 2.0));
         let sample_3 = anim.sample(0.5, Vector::new(4.0, 7.0));
 
-        assert!(2.4 < sample_1 && sample_1 < 2.5);
-        assert!(0.7 < sample_2 && sample_2 < 0.8);
-        assert!(-2.3 < sample_3 && sample_3 < -2.2);
+        assert!(0.6 < sample_1 && sample_1 < 0.7);
+        assert!(-3.1 < sample_2 && sample_2 < -3.0);
+        assert!(4.7 < sample_3 && sample_3 < 4.8);
     }
 }
