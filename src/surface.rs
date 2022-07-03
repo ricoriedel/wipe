@@ -1,5 +1,5 @@
 use anyhow::Error;
-use crossterm::cursor::MoveTo;
+use crossterm::cursor::{Hide, MoveTo, Show};
 use crossterm::{ExecutableCommand, QueueableCommand};
 use crossterm::style::{Color, Print, SetForegroundColor};
 use crossterm::terminal::{Clear, ClearType};
@@ -42,11 +42,19 @@ impl Default for Cell {
 }
 
 impl<T: Write> WriteSurface<T> {
-    pub fn new(out: T, width: usize, height: usize) -> Self {
-        Self {
+    pub fn new(mut out: T, width: usize, height: usize) -> Result<Self, Error> {
+        out.queue(Hide)?;
+
+        Ok(Self {
             out,
             array: Array2D::new(width, height)
-        }
+        })
+    }
+
+    fn try_drop(&mut self) -> Result<(), Error> {
+        self.out.queue(Show)?;
+        self.out.execute(Clear(ClearType::Purge))?;
+        Ok(())
     }
 }
 
@@ -93,7 +101,6 @@ impl<T: Write> Surface for WriteSurface<T> {
                 }
             }
         }
-        self.out.queue(MoveTo(0, 0))?;
         self.out.flush()?;
         Ok(())
     }
@@ -101,7 +108,7 @@ impl<T: Write> Surface for WriteSurface<T> {
 
 impl<T: Write> Drop for WriteSurface<T> {
     fn drop(&mut self) {
-        if let Err(e) = self.out.execute(Clear(ClearType::Purge)) {
+        if let Err(e) = self.try_drop() {
             println!("{}", e);
         }
     }
@@ -156,7 +163,7 @@ mod test {
     fn width() {
         let data = Data::new();
         let mock = MockWrite::new(data);
-        let surface = WriteSurface::new(mock, 10, 2);
+        let surface = WriteSurface::new(mock, 10, 2).unwrap();
 
         assert_eq!(10, surface.width());
     }
@@ -165,7 +172,7 @@ mod test {
     fn height() {
         let data = Data::new();
         let mock = MockWrite::new(data);
-        let surface = WriteSurface::new(mock, 5, 8);
+        let surface = WriteSurface::new(mock, 5, 8).unwrap();
 
         assert_eq!(8, surface.height());
     }
@@ -175,17 +182,20 @@ mod test {
         // Execute
         let data = Data::new();
         let mock = MockWrite::new(data.clone());
-        let mut surface = WriteSurface::new(mock, 3, 2);
+        let mut surface = WriteSurface::new(mock, 3, 2).unwrap();
 
         surface.draw(0, 0, 'A', Color::Green);
         surface.draw(1, 0, 'x', Color::Green);
         surface.clear(1, 1);
         surface.present().unwrap();
 
+        drop(surface);
+
         // Recreate expectation
         let expected = Data::new();
         let mut stream = MockWrite::new(expected.clone());
 
+        stream.queue(Hide).unwrap();
         stream.queue(MoveTo(0, 0)).unwrap();
         stream.queue(SetForegroundColor(Color::Green)).unwrap();
         stream.queue(Print('A')).unwrap();
@@ -193,7 +203,9 @@ mod test {
         stream.queue(MoveTo(1, 1)).unwrap();
         stream.queue(SetForegroundColor(Color::Reset)).unwrap();
         stream.queue(Print(' ')).unwrap();
-        stream.queue(MoveTo(0, 0)).unwrap();
+        stream.flush().unwrap();
+        stream.queue(Show).unwrap();
+        stream.queue(Clear(ClearType::Purge)).unwrap();
         stream.flush().unwrap();
 
         // Compare

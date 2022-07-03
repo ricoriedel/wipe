@@ -112,7 +112,7 @@ fn main() -> Result<(), Error> {
     let char = Box::new(SimpleCharSampler::new(args.chars));
 
     let sampler = ComposedSampler::new(animation, fill, color, char);
-    let surface = WriteSurface::new(stdout(), width, height);
+    let surface = WriteSurface::new(stdout(), width, height)?;
 
     let renderer = SamplerRenderer::new(surface, sampler);
     let timer = SimpleTimer::new(delay);
