@@ -5,8 +5,8 @@ use crate::timer::Timer;
 
 /// Periodically calls [Renderer::render] and [Renderer::present].
 pub struct Runner<TTimer, TRenderer> {
+    duration: Duration,
     timer: TTimer,
-    ticks: u128,
     renderer: TRenderer,
 }
 
@@ -14,19 +14,23 @@ impl<T1: Timer, T2: Renderer> Runner<T1, T2> {
     pub fn new(duration: Duration,
                timer: T1,
                renderer: T2) -> Self {
-        let ticks = duration.as_nanos() / timer.delay().as_nanos();
 
-        Self { timer, ticks, renderer }
+        Self { duration, timer, renderer }
     }
 
     pub fn run(mut self) -> Result<(), Error> {
-        for i in 0..=self.ticks {
-            let step = i as f32 / self.ticks as f32;
+        self.timer.set();
+
+        while self.timer.elapsed() < self.duration {
+            let step = self.timer.elapsed().as_secs_f32() / self.duration.as_secs_f32();
 
             self.renderer.render(step);
             self.renderer.present()?;
             self.timer.sleep();
         }
+        self.renderer.render(1.0);
+        self.renderer.present()?;
+
         Ok(())
     }
 }
@@ -46,19 +50,21 @@ mod test {
         let mut renderer = MockRenderer::new();
         let seq = &mut Sequence::new();
 
-        timer.expect_delay().return_const(Duration::from_secs(2));
+        timer.expect_set().once().in_sequence(seq).return_const(());
 
+        timer.expect_elapsed().times(2).in_sequence(seq).return_const(Duration::from_secs(0));
         renderer.expect_render().once().with(eq(0.0)).in_sequence(seq).return_const(());
         renderer.expect_present().once().in_sequence(seq).returning(|| Ok(()));
         timer.expect_sleep().once().in_sequence(seq).return_const(());
 
+        timer.expect_elapsed().times(2).in_sequence(seq).return_const(Duration::from_secs(2));
         renderer.expect_render().once().with(eq(0.5)).in_sequence(seq).return_const(());
         renderer.expect_present().once().in_sequence(seq).returning(|| Ok(()));
         timer.expect_sleep().once().in_sequence(seq).return_const(());
 
+        timer.expect_elapsed().times(1).in_sequence(seq).return_const(Duration::from_secs(4));
         renderer.expect_render().once().with(eq(1.0)).in_sequence(seq).return_const(());
         renderer.expect_present().once().in_sequence(seq).returning(|| Ok(()));
-        timer.expect_sleep().once().in_sequence(seq).return_const(());
 
         let runner = Runner::new(Duration::from_secs(4), timer, renderer);
 
