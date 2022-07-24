@@ -1,21 +1,7 @@
-# Don't forget to update
-# - dist/arch/PKGBUILD
-# - dist/deb/build
-
 [package]
 name = "wipe"
-version = "1.0.1"
+version = "2.0.0"
 edition = "2021"
 license = "MIT"
-description = "Wipe your terminal with a random animation."
 repository = "https://github.com/ricoriedel/wipe"
 authors = ["Rico Riedel"]
-
-[dependencies]
-anyhow = "1.0"
-clap = { version = "3.2", features = ["derive"]}
-crossterm = "0.23"
-rand = "0.8"
-
-[dev-dependencies]
-mockall = "0.11"
