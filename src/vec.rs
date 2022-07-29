@@ -15,6 +15,14 @@ impl Vector {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 
+    pub fn abs(&self) -> Vector {
+        Self::new(self.x.abs(), self.y.abs())
+    }
+
+    pub fn sum(&self) -> f32 {
+        self.x + self.y
+    }
+
     pub fn center(&self) -> Vector {
         Self::new(self.x / 2.0, self.y / 2.0)
     }
@@ -47,6 +55,16 @@ mod test {
     #[test]
     fn len() {
         assert_abs_diff_eq!(8.5, Vector::new(3.0, 8.0).len(), epsilon = 0.1);
+    }
+
+    #[test]
+    fn abs() {
+        assert_eq!(Vector::new(3.0, 7.0), Vector::new(-3.0, -7.0).abs());
+    }
+
+    #[test]
+    fn sum() {
+        assert_eq!(11.0, Vector::new(3.0, 8.0).sum());
     }
 
     #[test]
