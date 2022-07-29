@@ -1,4 +1,4 @@
-use crate::Error;
+use crate::error::Error;
 use crossterm::{Command, QueueableCommand};
 use std::io::Write;
 
