@@ -5,3 +5,9 @@ edition = "2021"
 license = "MIT"
 repository = "https://github.com/ricoriedel/wipe"
 authors = ["Rico Riedel"]
+
+[dependencies]
+crossterm = "0.24"
+
+[dev-dependencies]
+mockall = "0.11"
