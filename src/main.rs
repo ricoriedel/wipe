@@ -1,8 +1,7 @@
-mod error;
-mod term;
+pub mod error;
+pub mod printer;
+pub mod term;
 
-use error::Error;
-
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), error::Error> {
     Ok(())
 }
