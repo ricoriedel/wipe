@@ -1,3 +1,4 @@
+#[cfg_attr(test, mockall::automock)]
 pub trait CharConverter {
     fn convert(&self, level: f32) -> char;
 }
