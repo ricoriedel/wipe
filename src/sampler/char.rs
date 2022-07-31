@@ -4,20 +4,21 @@ pub trait CharConverter {
 
 pub struct CharConverterImpl {
     chars: String,
+    count: usize,
 }
 
 impl CharConverterImpl {
     pub fn new(chars: String) -> Self {
-        Self { chars }
+        let count = chars.chars().count();
+
+        Self { chars, count }
     }
 }
 
 impl CharConverter for CharConverterImpl {
     fn convert(&self, level: f32) -> char {
-        assert!(level >= 0.0);
-        assert!(level < 1.0);
-
-        let index = (level * self.chars.len() as f32) as usize;
+        let len = self.count as f32;
+        let index = (level * len).rem_euclid(len) as usize;
 
         self.chars.chars().nth(index).unwrap()
     }
@@ -28,9 +29,10 @@ mod test {
     use super::*;
 
     #[test]
-    #[should_panic]
-    fn convert_index_below_zero() {
-        CharConverterImpl::new("abc".to_string()).convert(-0.1);
+    fn convert_negative_index() {
+        let converter = CharConverterImpl::new("abc".to_string());
+
+        assert_eq!('c', converter.convert(-0.2));
     }
 
     #[test]
@@ -48,14 +50,16 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn convert_index_one() {
-        CharConverterImpl::new("abc".to_string()).convert(1.0);
+        let converter = CharConverterImpl::new("abc".to_string());
+
+        assert_eq!('a', converter.convert(1.0));
     }
 
     #[test]
-    #[should_panic]
     fn convert_index_above_one() {
-        CharConverterImpl::new("abc".to_string()).convert(1.1);
+        let converter = CharConverterImpl::new("abc".to_string());
+
+        assert_eq!('b', converter.convert(1.5));
     }
 }

@@ -16,10 +16,8 @@ impl ColorConverterImpl {
 
 impl ColorConverter for ColorConverterImpl {
     fn convert(&self, level: f32) -> Color {
-        assert!(level >= 0.0);
-        assert!(level < 1.0);
-
-        let index = (level * self.colors.len() as f32) as usize;
+        let len = self.colors.len() as f32;
+        let index = (level * len).rem_euclid(len) as usize;
 
         self.colors[index]
     }
@@ -31,9 +29,10 @@ mod test {
     use crossterm::style::Color::*;
 
     #[test]
-    #[should_panic]
-    fn convert_index_below_zero() {
-        ColorConverterImpl::new(vec![Red, Green, Blue]).convert(-0.1);
+    fn convert_negative_index() {
+        let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
+
+        assert!(matches!(converter.convert(-0.2), Blue));
     }
 
     #[test]
@@ -51,14 +50,16 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn convert_index_one() {
-        ColorConverterImpl::new(vec![Red, Green, Blue]).convert(1.0);
+        let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
+
+        assert!(matches!(converter.convert(1.0), Red));
     }
 
     #[test]
-    #[should_panic]
     fn convert_index_above_one() {
-        ColorConverterImpl::new(vec![Red, Green, Blue]).convert(1.1);
+        let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
+
+        assert!(matches!(converter.convert(1.5), Green));
     }
 }
