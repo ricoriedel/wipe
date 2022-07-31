@@ -8,6 +8,7 @@ authors = ["Rico Riedel"]
 
 [dependencies]
 crossterm = "0.24"
+derive_more = "0.99"
 
 [dev-dependencies]
 mockall = "0.11"
