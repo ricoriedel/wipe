@@ -1,5 +1,6 @@
 use crossterm::style::Color;
 
+#[cfg_attr(test, mockall::automock)]
 pub trait ColorConverter {
     fn convert(&self, level: f32) -> Color;
 }

@@ -1,9 +1,11 @@
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Level {
     Keep,
     Draw(f32),
     Clear,
 }
 
+#[cfg_attr(test, mockall::automock)]
 pub trait LevelConverter {
     fn convert(&self, level: f32) -> Level;
 }

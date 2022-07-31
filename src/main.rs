@@ -1,7 +1,7 @@
 pub mod error;
 pub mod pattern;
 pub mod printer;
-pub mod sampler;
+pub mod convert;
 pub mod term;
 mod vec;
 
