@@ -33,35 +33,23 @@ mod test {
     fn convert_keep() {
         let converter = LevelConverterImpl::default();
 
-        assert!(matches!(converter.convert(-0.1), Level::Keep));
+        assert_eq!(Level::Keep, converter.convert(-0.1));
     }
 
     #[test]
     fn convert_draw() {
         let converter = LevelConverterImpl::default();
 
-        if let Level::Draw(level) = converter.convert(0.0) {
-            assert_eq!(0.0, level);
-        } else {
-            panic!();
-        }
-        if let Level::Draw(level) = converter.convert(0.5) {
-            assert_eq!(0.5, level);
-        } else {
-            panic!();
-        }
-        if let Level::Draw(level) = converter.convert(0.9) {
-            assert_eq!(0.9, level);
-        } else {
-            panic!();
-        }
+        assert_eq!(Level::Draw(0.0), converter.convert(0.0));
+        assert_eq!(Level::Draw(0.5), converter.convert(0.5));
+        assert_eq!(Level::Draw(0.9), converter.convert(0.9));
     }
 
     #[test]
     fn convert_clear() {
         let converter = LevelConverterImpl::default();
 
-        assert!(matches!(converter.convert(1.0), Level::Clear));
-        assert!(matches!(converter.convert(1.5), Level::Clear));
+        assert_eq!(Level::Clear, converter.convert(1.0));
+        assert_eq!(Level::Clear, converter.convert(1.5));
     }
 }
