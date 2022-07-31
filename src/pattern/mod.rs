@@ -17,6 +17,7 @@ pub trait PatternFactory {
     fn create(&self, config: &Config) -> Box<dyn Pattern>;
 }
 
+#[cfg_attr(test, mockall::automock)]
 pub trait Pattern {
     fn sample(&self, pos: Vector) -> f32;
 }
