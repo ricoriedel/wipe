@@ -33,34 +33,34 @@ mod test {
     fn convert_negative_index() {
         let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
 
-        assert!(matches!(converter.convert(-0.2), Blue));
+        assert_eq!(Blue, converter.convert(-0.2));
     }
 
     #[test]
     fn convert_index_zero() {
         let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
 
-        assert!(matches!(converter.convert(0.0), Red));
+        assert_eq!(Red, converter.convert(0.0));
     }
 
     #[test]
     fn convert() {
         let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
 
-        assert!(matches!(converter.convert(0.5), Green));
+        assert_eq!(Green, converter.convert(0.5));
     }
 
     #[test]
     fn convert_index_one() {
         let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
 
-        assert!(matches!(converter.convert(1.0), Red));
+        assert_eq!(Red, converter.convert(1.0));
     }
 
     #[test]
     fn convert_index_above_one() {
         let converter = ColorConverterImpl::new(vec![Red, Green, Blue]);
 
-        assert!(matches!(converter.convert(1.5), Green));
+        assert_eq!(Green, converter.convert(1.5));
     }
 }
