@@ -1,5 +1,5 @@
-use crate::pattern::{Config, Pattern, PatternFactory};
-use crate::vec::Vector;
+use crate::pattern::*;
+use crate::Vector;
 use std::f32::consts::PI;
 
 #[derive(Default)]

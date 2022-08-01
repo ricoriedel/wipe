@@ -1,9 +1,8 @@
-use crate::convert::char::CharSample;
-use crate::convert::Converter;
-use crate::error::Error;
-use crate::pattern::{Config, Sampler, SamplerFactory};
-use crate::printer::Printer;
-use crate::vec::Vector;
+use crate::convert::{CharSample, Converter};
+use crate::pattern::*;
+use crate::Error;
+use crate::Printer;
+use crate::Vector;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Renderer {
@@ -69,7 +68,7 @@ mod test {
     use crate::convert::MockConverter;
     use crate::pattern::MockSampler;
     use crate::pattern::MockSamplerFactory;
-    use crate::printer::MockPrinter;
+    use crate::MockPrinter;
     use crossterm::style::Color;
     use mockall::predicate::eq;
     use mockall::Sequence;

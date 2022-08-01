@@ -1,11 +1,20 @@
 pub mod convert;
-pub mod error;
 pub mod pattern;
-pub mod printer;
+
+mod error;
+mod printer;
 mod renderer;
-pub mod term;
+mod term;
+mod timer;
 mod vec;
 
-fn main() -> Result<(), error::Error> {
+pub use error::*;
+pub use printer::*;
+pub use renderer::*;
+pub use term::*;
+pub use timer::*;
+pub use vec::*;
+
+fn main() -> Result<(), Error> {
     Ok(())
 }

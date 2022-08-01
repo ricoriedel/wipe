@@ -1,5 +1,5 @@
-use crate::error::Error;
-use crate::term::Terminal;
+use crate::Error;
+use crate::Terminal;
 use crossterm::cursor::*;
 use crossterm::style::*;
 use crossterm::terminal::*;
@@ -96,7 +96,7 @@ impl<T: Terminal> Printer for PrinterImpl<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::term::MockTerminal;
+    use crate::MockTerminal;
     use mockall::predicate::eq;
 
     #[test]

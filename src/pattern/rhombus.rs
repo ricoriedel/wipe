@@ -1,5 +1,5 @@
-use crate::pattern::{Config, Pattern, PatternFactory};
-use crate::vec::Vector;
+use crate::pattern::*;
+use crate::Vector;
 
 #[derive(Default)]
 pub struct RhombusFactory;
@@ -42,7 +42,7 @@ mod test {
     fn name() {
         assert_eq!("rhombus", RhombusFactory::default().name());
     }
-    
+
     #[test]
     fn sample() {
         let config = Config {
