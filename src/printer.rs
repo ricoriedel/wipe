@@ -4,6 +4,7 @@ use crossterm::cursor::*;
 use crossterm::style::*;
 use crossterm::terminal::*;
 
+#[cfg_attr(test, mockall::automock)]
 pub trait Printer {
     fn show_cursor(&mut self) -> Result<(), Error>;
     fn hide_cursor(&mut self) -> Result<(), Error>;

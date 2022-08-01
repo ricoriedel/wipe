@@ -1,11 +1,11 @@
-mod circle;
-mod line;
-mod rhombus;
-mod wheel;
+pub mod circle;
+pub mod line;
+pub mod rhombus;
+pub mod wheel;
 
 use crate::vec::Vector;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Config {
     pub size: Vector,
     pub step: f32,
@@ -22,8 +22,11 @@ pub trait Pattern {
     fn sample(&self, pos: Vector) -> f32;
 }
 
+#[cfg_attr(test, mockall::automock(type Sampler = MockSampler;))]
 pub trait SamplerFactory {
-    fn create(&self, config: &Config) -> Box<dyn Sampler>;
+    type Sampler: Sampler;
+
+    fn create(&self, config: &Config) -> Self::Sampler;
 }
 
 #[cfg_attr(test, mockall::automock)]
@@ -46,11 +49,10 @@ pub struct SamplerImpl {
 }
 
 impl SamplerFactory for SamplerFactoryImpl {
-    fn create(&self, config: &Config) -> Box<dyn Sampler> {
-        Box::new(SamplerImpl::new(
-            self.char.create(config),
-            self.color.create(config),
-        ))
+    type Sampler = SamplerImpl;
+
+    fn create(&self, config: &Config) -> Self::Sampler {
+        SamplerImpl::new(self.char.create(config), self.color.create(config))
     }
 }
 

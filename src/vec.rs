@@ -11,6 +11,10 @@ impl Vector {
         Self { x, y }
     }
 
+    pub fn from_terminal(x: u16, y: u16) -> Self {
+        Vector::new(x as f32, y as f32 * 2.0)
+    }
+
     pub fn len(&self) -> f32 {
         (self.x * self.x + self.y * self.y).sqrt()
     }
