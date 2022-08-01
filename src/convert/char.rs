@@ -26,14 +26,14 @@ impl CharConverterImpl {
 impl CharConverter for CharConverterImpl {
     fn convert(&self, level: f32) -> CharSample {
         if level < 0.0 {
-            CharSample::Keep
+            CharSample::Clear
         } else if level < 1.0 {
             let index = (level * self.count) as usize;
             let char = self.chars.chars().nth(index).unwrap();
 
             CharSample::Draw(char)
         } else {
-            CharSample::Clear
+            CharSample::Keep
         }
     }
 }
@@ -43,10 +43,10 @@ mod test {
     use super::*;
 
     #[test]
-    fn convert_keep() {
+    fn convert_clear() {
         let converter = CharConverterImpl::new("abc".to_string());
 
-        assert_eq!(CharSample::Keep, converter.convert(-0.1));
+        assert_eq!(CharSample::Clear, converter.convert(-0.1));
     }
 
     #[test]
@@ -59,10 +59,10 @@ mod test {
     }
 
     #[test]
-    fn convert_clear() {
+    fn convert_keep() {
         let converter = CharConverterImpl::new("123".to_string());
 
-        assert_eq!(CharSample::Clear, converter.convert(1.0));
-        assert_eq!(CharSample::Clear, converter.convert(1.5));
+        assert_eq!(CharSample::Keep, converter.convert(1.0));
+        assert_eq!(CharSample::Keep, converter.convert(1.5));
     }
 }
