@@ -14,6 +14,12 @@ impl From<std::io::Error> for Error {
     }
 }
 
+impl From<&str> for Error {
+    fn from(msg: &str) -> Self {
+        Error(msg.to_string())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -25,5 +31,12 @@ mod test {
         let err: Error = io_err.into();
 
         assert_eq!(msg, format!("{:?}", err));
+    }
+
+    #[test]
+    fn from_ref_str() {
+        let err: Error = "123".into();
+
+        assert_eq!("123", format!("{:?}", err));
     }
 }

@@ -18,17 +18,21 @@ pub trait Printer {
 
 pub struct PrinterImpl<T> {
     term: T,
+    position: (u16, u16),
     cursor: Option<bool>,
     foreground: Option<Color>,
 }
 
-impl<T> PrinterImpl<T> {
-    pub fn new(term: T) -> Self {
-        Self {
+impl<T: Terminal> PrinterImpl<T> {
+    pub fn new(term: T) -> Result<Self, Error> {
+        let position = term.position()?;
+
+        Ok(Self {
             term,
+            position,
             cursor: None,
             foreground: None,
-        }
+        })
     }
 }
 
@@ -50,12 +54,17 @@ impl<T: Terminal> Printer for PrinterImpl<T> {
     }
 
     fn print(&mut self, char: char) -> Result<(), Error> {
+        if char < '\u{20}' || char == '\u{7F}' {
+            return Err("Special chars can't be printed.".into());
+        }
+        self.position.0 += 1;
         self.term.queue(Print(char))?;
         Ok(())
     }
 
     fn move_to(&mut self, x: u16, y: u16) -> Result<(), Error> {
-        if (x, y) != self.term.position()? {
+        if self.position != (x, y) {
+            self.position = (x, y);
             self.term.queue(MoveTo(x, y))?;
         }
         Ok(())
@@ -66,7 +75,7 @@ impl<T: Terminal> Printer for PrinterImpl<T> {
     }
 
     fn set_foreground(&mut self, color: Color) -> Result<(), Error> {
-        if self.foreground == Some(color) {
+        if self.foreground != Some(color) {
             self.foreground = Some(color);
             self.term.queue(SetForegroundColor(color))?;
         }
@@ -93,23 +102,25 @@ mod test {
     #[test]
     fn show_cursor() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Show))
             .once()
             .returning(|_| Ok(()));
 
-        PrinterImpl::new(mock).show_cursor().unwrap();
+        PrinterImpl::new(mock).unwrap().show_cursor().unwrap();
     }
 
     #[test]
     fn show_cursor_twice_queues_once() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Show))
             .once()
             .returning(|_| Ok(()));
 
-        let mut printer = PrinterImpl::new(mock);
+        let mut printer = PrinterImpl::new(mock).unwrap();
 
         printer.show_cursor().unwrap();
         printer.show_cursor().unwrap();
@@ -118,13 +129,14 @@ mod test {
     #[test]
     fn show_cursor_after_hiding_queues_show() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Show))
             .once()
             .returning(|_| Ok(()));
         mock.expect_queue().with(eq(Hide)).returning(|_| Ok(()));
 
-        let mut printer = PrinterImpl::new(mock);
+        let mut printer = PrinterImpl::new(mock).unwrap();
 
         printer.hide_cursor().unwrap();
         printer.show_cursor().unwrap();
@@ -133,23 +145,25 @@ mod test {
     #[test]
     fn hide_cursor() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Hide))
             .once()
             .returning(|_| Ok(()));
 
-        PrinterImpl::new(mock).hide_cursor().unwrap();
+        PrinterImpl::new(mock).unwrap().hide_cursor().unwrap();
     }
 
     #[test]
     fn hide_cursor_twice_queues_once() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Hide))
             .once()
             .returning(|_| Ok(()));
 
-        let mut printer = PrinterImpl::new(mock);
+        let mut printer = PrinterImpl::new(mock).unwrap();
 
         printer.hide_cursor().unwrap();
         printer.hide_cursor().unwrap();
@@ -158,27 +172,101 @@ mod test {
     #[test]
     fn hide_cursor_after_showing_queues_hide() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Show))
             .once()
             .returning(|_| Ok(()));
         mock.expect_queue().with(eq(Hide)).returning(|_| Ok(()));
 
-        let mut printer = PrinterImpl::new(mock);
+        let mut printer = PrinterImpl::new(mock).unwrap();
 
         printer.show_cursor().unwrap();
         printer.hide_cursor().unwrap();
     }
 
     #[test]
+    fn set_foreground() {
+        let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
+        mock.expect_queue()
+            .with(eq(SetForegroundColor(Color::Blue)))
+            .once()
+            .returning(|_| Ok(()));
+
+        PrinterImpl::new(mock)
+            .unwrap()
+            .set_foreground(Color::Blue)
+            .unwrap();
+    }
+
+    #[test]
+    fn set_foreground_twice_queues_once() {
+        let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
+        mock.expect_queue()
+            .once()
+            .returning(|_: SetForegroundColor| Ok(()));
+
+        let mut printer = PrinterImpl::new(mock).unwrap();
+
+        printer.set_foreground(Color::Red).unwrap();
+        printer.set_foreground(Color::Red).unwrap();
+    }
+
+    #[test]
+    fn set_foreground_different_color_queues() {
+        let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
+        mock.expect_queue()
+            .times(3)
+            .returning(|_: SetForegroundColor| Ok(()));
+
+        let mut printer = PrinterImpl::new(mock).unwrap();
+
+        printer.set_foreground(Color::Red).unwrap();
+        printer.set_foreground(Color::Blue).unwrap();
+        printer.set_foreground(Color::Red).unwrap();
+    }
+
+    #[test]
     fn print() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Print('R')))
             .once()
             .returning(|_| Ok(()));
 
-        PrinterImpl::new(mock).print('R').unwrap();
+        PrinterImpl::new(mock).unwrap().print('R').unwrap();
+    }
+
+    #[test]
+    fn print_moves_cursor() {
+        let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((2, 4)));
+        mock.expect_queue()
+            .times(3)
+            .returning(|_: Print<char>| Ok(()));
+
+        let mut printer = PrinterImpl::new(mock).unwrap();
+
+        printer.print('A').unwrap();
+        printer.print('B').unwrap();
+        printer.print('C').unwrap();
+        printer.move_to(5, 4).unwrap();
+    }
+
+    #[test]
+    fn print_special_char_fails() {
+        let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((2, 4)));
+
+        let mut printer = PrinterImpl::new(mock).unwrap();
+
+        assert!(printer.print('\u{0}').is_err());
+        assert!(printer.print('\u{1F}').is_err());
+        assert!(printer.print('\u{7F}').is_err());
     }
 
     #[test]
@@ -190,7 +278,7 @@ mod test {
             .once()
             .returning(|_| Ok(()));
 
-        PrinterImpl::new(mock).move_to(5, 4).unwrap();
+        PrinterImpl::new(mock).unwrap().move_to(5, 4).unwrap();
     }
 
     #[test]
@@ -198,33 +286,36 @@ mod test {
         let mut mock = MockTerminal::new();
         mock.expect_position().returning(|| Ok((3, 13)));
 
-        PrinterImpl::new(mock).move_to(3, 13).unwrap();
+        PrinterImpl::new(mock).unwrap().move_to(3, 13).unwrap();
     }
 
     #[test]
     fn size() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_size().returning(|| Ok((14, 76)));
 
-        assert_eq!((14, 76), PrinterImpl::new(mock).size().unwrap());
+        assert_eq!((14, 76), PrinterImpl::new(mock).unwrap().size().unwrap());
     }
 
     #[test]
     fn clear() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_queue()
             .with(eq(Clear(ClearType::Purge)))
             .once()
             .returning(|_| Ok(()));
 
-        PrinterImpl::new(mock).clear().unwrap();
+        PrinterImpl::new(mock).unwrap().clear().unwrap();
     }
 
     #[test]
     fn flush() {
         let mut mock = MockTerminal::new();
+        mock.expect_position().returning(|| Ok((0, 0)));
         mock.expect_flush().once().returning(|| Ok(()));
 
-        PrinterImpl::new(mock).flush().unwrap();
+        PrinterImpl::new(mock).unwrap().flush().unwrap();
     }
 }
