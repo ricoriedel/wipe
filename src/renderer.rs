@@ -5,6 +5,7 @@ use crate::pattern::{Config, Sampler, SamplerFactory};
 use crate::printer::Printer;
 use crate::vec::Vector;
 
+#[cfg_attr(test, mockall::automock)]
 pub trait Renderer {
     fn begin(&mut self) -> Result<(), Error>;
     fn render(&mut self, step: f32) -> Result<(), Error>;
