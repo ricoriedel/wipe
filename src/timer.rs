@@ -1,5 +1,5 @@
-use crate::error::Error;
-use crate::renderer::Renderer;
+use crate::Error;
+use crate::Renderer;
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -58,7 +58,7 @@ impl<T: Clock> Timer<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::renderer::MockRenderer;
+    use crate::MockRenderer;
     use mockall::predicate::eq;
     use mockall::Sequence;
 

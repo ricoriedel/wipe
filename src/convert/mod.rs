@@ -1,9 +1,10 @@
-use crate::convert::char::{CharConverter, CharSample};
-use crate::convert::color::ColorConverter;
-use crossterm::style::Color;
+mod char;
+mod color;
 
-pub mod char;
-pub mod color;
+pub use crate::convert::char::*;
+pub use crate::convert::color::*;
+
+use crossterm::style::Color;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Converter {
@@ -30,8 +31,8 @@ impl<T1: CharConverter, T2: ColorConverter> Converter for ConverterImpl<T1, T2> 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::convert::char::MockCharConverter;
-    use crate::convert::color::MockColorConverter;
+    use crate::convert::MockCharConverter;
+    use crate::convert::MockColorConverter;
     use mockall::predicate::*;
 
     #[test]

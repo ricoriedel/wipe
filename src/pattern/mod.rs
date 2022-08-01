@@ -1,9 +1,14 @@
-pub mod circle;
-pub mod line;
-pub mod rhombus;
-pub mod wheel;
+mod circle;
+mod line;
+mod rhombus;
+mod wheel;
 
-use crate::vec::Vector;
+pub use circle::*;
+pub use line::*;
+pub use rhombus::*;
+pub use wheel::*;
+
+use crate::Vector;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Config {

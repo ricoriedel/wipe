@@ -1,6 +1,4 @@
-use std::ops::Sub;
-
-#[derive(Copy, Clone, PartialEq, Debug, Default)]
+#[derive(Copy, Clone, PartialEq, Debug, Default, derive_more::Sub)]
 pub struct Vector {
     pub x: f32,
     pub y: f32,
@@ -33,14 +31,6 @@ impl Vector {
 
     pub fn angle(&self) -> f32 {
         self.y.atan2(self.x)
-    }
-}
-
-impl Sub for Vector {
-    type Output = Vector;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
@@ -79,13 +69,5 @@ mod test {
     #[test]
     fn angle() {
         assert_abs_diff_eq!(-1.5, Vector::new(2.0, -20.0).angle(), epsilon = 0.1);
-    }
-
-    #[test]
-    fn sub() {
-        assert_eq!(
-            Vector::new(-5.0, 10.0),
-            Vector::new(3.0, 16.0) - Vector::new(8.0, 6.0)
-        );
     }
 }
