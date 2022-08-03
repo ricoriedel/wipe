@@ -7,8 +7,10 @@ repository = "https://github.com/ricoriedel/wipe"
 authors = ["Rico Riedel"]
 
 [dependencies]
+clap = { version = "3.2", features = ["derive"] }
 crossterm = "0.24"
 derive_more = "0.99"
+rand = "0.8"
 
 [dev-dependencies]
 mockall = "0.11"

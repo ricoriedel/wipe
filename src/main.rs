@@ -15,6 +15,149 @@ pub use term::*;
 pub use timer::*;
 pub use vec::*;
 
+use crate::convert::*;
+use crate::pattern::*;
+use clap::{Parser, ValueEnum};
+use crossterm::style::Color;
+use crossterm::style::Color::*;
+use rand::prelude::*;
+use std::io::stdout;
+use std::time::Duration;
+
+#[derive(Parser)]
+#[clap(
+    author  = env!("CARGO_PKG_AUTHORS"),
+    version = env!("CARGO_PKG_VERSION"),
+    about   = env!("CARGO_PKG_DESCRIPTION"),
+)]
+struct Args {
+    #[clap(long, default_value_t = 1000)]
+    duration: u64,
+    #[clap(long, default_value_t = 60)]
+    fps: u64,
+    #[clap(long, default_value = ".:+#")]
+    chars: String,
+    #[clap(long, value_enum)]
+    char_pattern: Vec<PatternEnum>,
+    #[clap(long, value_enum)]
+    colors: Vec<PalletEnum>,
+    #[clap(long, value_enum)]
+    color_pattern: Vec<PatternEnum>,
+}
+
+#[derive(ValueEnum, Clone)]
+enum PalletEnum {
+    Red,
+    Yellow,
+    Green,
+    Blue,
+    Magenta,
+    Cyan,
+    Rainbow,
+
+    DarkRed,
+    DarkYellow,
+    DarkGreen,
+    DarkBlue,
+    DarkMagenta,
+    DarkCyan,
+    DarkRainbow,
+
+    RedYellow,
+    YellowGreen,
+    GreenBlue,
+    BlueCyan,
+    CyanMagenta,
+    MagentaRed,
+
+    Gray,
+}
+
+#[derive(ValueEnum, Clone)]
+enum PatternEnum {
+    Circle,
+    Line,
+    Rhombus,
+    Wheel,
+}
+
 fn main() -> Result<(), Error> {
-    Ok(())
+    let args = Args::parse();
+    let rand = &mut thread_rng();
+
+    let char: Box<dyn PatternFactory> = create_pattern(choose(args.char_pattern, rand));
+    let color: Box<dyn PatternFactory> = create_pattern(choose(args.color_pattern, rand));
+    let pallet = create_pallet(choose(args.colors, rand));
+
+    let sampler = SamplerFactoryImpl::new(char, color);
+    let char_converter = CharConverterImpl::new(args.chars);
+    let color_converter = ColorConverterImpl::new(pallet);
+    let converter = ConverterImpl::new(char_converter, color_converter);
+    let term = TerminalImpl::new(stdout());
+    let printer = PrinterImpl::new(term)?;
+    let renderer = RendererImpl::new(sampler, converter, printer);
+
+    let clock = ClockImpl::default();
+    let duration = Duration::from_millis(args.duration);
+    let delay = Duration::from_nanos(1_000_000_000 / args.fps);
+    let timer = Timer::new(clock, duration, delay);
+
+    timer.run(renderer)
+}
+
+fn choose<TValue: ValueEnum + Clone, TRand: Rng>(options: Vec<TValue>, rand: &mut TRand) -> TValue {
+    if options.is_empty() {
+        TValue::value_variants()
+            .iter()
+            .choose(rand)
+            .unwrap()
+            .clone()
+    } else {
+        options.iter().choose(rand).unwrap().clone()
+    }
+}
+
+fn create_pattern(pattern: PatternEnum) -> Box<dyn PatternFactory> {
+    match pattern {
+        PatternEnum::Circle => Box::new(CircleFactory::default()),
+        PatternEnum::Line => Box::new(LineFactory::default()),
+        PatternEnum::Rhombus => Box::new(RhombusFactory::default()),
+        PatternEnum::Wheel => Box::new(WheelFactory::default()),
+    }
+}
+
+fn create_pallet(colors: PalletEnum) -> Vec<Color> {
+    match colors {
+        PalletEnum::Red => vec![DarkRed, Red, White],
+        PalletEnum::Yellow => vec![DarkYellow, Yellow, White],
+        PalletEnum::Green => vec![DarkGreen, Green, White],
+        PalletEnum::Blue => vec![DarkBlue, Blue, White],
+        PalletEnum::Magenta => vec![DarkMagenta, Magenta, White],
+        PalletEnum::Cyan => vec![DarkCyan, Cyan, White],
+        PalletEnum::Rainbow => vec![Red, Yellow, Green, Blue, Cyan, Magenta],
+
+        PalletEnum::DarkRed => vec![Black, DarkRed, Red],
+        PalletEnum::DarkYellow => vec![Black, DarkYellow, Yellow],
+        PalletEnum::DarkGreen => vec![Black, DarkGreen, Green],
+        PalletEnum::DarkBlue => vec![Black, DarkBlue, Blue],
+        PalletEnum::DarkMagenta => vec![Black, DarkMagenta, Magenta],
+        PalletEnum::DarkCyan => vec![Black, DarkCyan, Cyan],
+        PalletEnum::DarkRainbow => vec![
+            DarkRed,
+            DarkYellow,
+            DarkGreen,
+            DarkBlue,
+            DarkCyan,
+            DarkMagenta,
+        ],
+
+        PalletEnum::RedYellow => vec![Red, DarkRed, DarkYellow, Yellow],
+        PalletEnum::YellowGreen => vec![Yellow, DarkYellow, DarkGreen, Green],
+        PalletEnum::GreenBlue => vec![Green, DarkGreen, DarkBlue, Blue],
+        PalletEnum::BlueCyan => vec![Blue, DarkBlue, DarkCyan, Cyan],
+        PalletEnum::CyanMagenta => vec![Cyan, DarkCyan, DarkMagenta, Magenta],
+        PalletEnum::MagentaRed => vec![Magenta, DarkMagenta, DarkRed, Red],
+
+        PalletEnum::Gray => vec![Black, DarkGrey, Grey, White],
+    }
 }
