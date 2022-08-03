@@ -9,10 +9,6 @@ pub struct Rhombus {
 }
 
 impl PatternFactory for RhombusFactory {
-    fn name(&self) -> String {
-        stringify!(Rhombus).to_lowercase()
-    }
-
     fn create(&self, config: &Config) -> Box<dyn Pattern> {
         Box::new(Rhombus::new(config))
     }
@@ -37,11 +33,6 @@ impl Pattern for Rhombus {
 mod test {
     use super::*;
     use approx::*;
-
-    #[test]
-    fn name() {
-        assert_eq!("rhombus", RhombusFactory::default().name());
-    }
 
     #[test]
     fn sample() {

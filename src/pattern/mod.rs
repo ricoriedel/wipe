@@ -17,8 +17,6 @@ pub struct Config {
 }
 
 pub trait PatternFactory {
-    fn name(&self) -> String;
-
     fn create(&self, config: &Config) -> Box<dyn Pattern>;
 }
 

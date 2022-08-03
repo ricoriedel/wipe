@@ -9,10 +9,6 @@ pub struct Circle {
 }
 
 impl PatternFactory for CircleFactory {
-    fn name(&self) -> String {
-        stringify!(Circle).to_lowercase()
-    }
-
     fn create(&self, config: &Config) -> Box<dyn Pattern> {
         Box::new(Circle::new(config))
     }
@@ -37,11 +33,6 @@ impl Pattern for Circle {
 mod test {
     use super::*;
     use approx::*;
-
-    #[test]
-    fn name() {
-        assert_eq!("circle", CircleFactory::default().name());
-    }
 
     #[test]
     fn sample() {

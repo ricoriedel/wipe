@@ -9,10 +9,6 @@ pub struct Wheel {
 }
 
 impl PatternFactory for WheelFactory {
-    fn name(&self) -> String {
-        stringify!(Wheel).to_lowercase()
-    }
-
     fn create(&self, config: &Config) -> Box<dyn Pattern> {
         Box::new(Wheel::new(config))
     }
@@ -36,11 +32,6 @@ impl Pattern for Wheel {
 mod test {
     use super::*;
     use approx::*;
-
-    #[test]
-    fn name() {
-        assert_eq!("wheel", WheelFactory::default().name());
-    }
 
     #[test]
     fn sample() {

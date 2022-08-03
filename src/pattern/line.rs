@@ -8,10 +8,6 @@ pub struct Line {
 }
 
 impl PatternFactory for LineFactory {
-    fn name(&self) -> String {
-        stringify!(Line).to_lowercase()
-    }
-
     fn create(&self, config: &Config) -> Box<dyn Pattern> {
         Box::new(Line::new(config))
     }
@@ -35,11 +31,6 @@ impl Pattern for Line {
 mod test {
     use super::*;
     use approx::*;
-
-    #[test]
-    fn name() {
-        assert_eq!("line", LineFactory::default().name());
-    }
 
     #[test]
     fn sample() {
