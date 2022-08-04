@@ -33,37 +33,51 @@ use std::time::Duration;
     about   = env!("CARGO_PKG_DESCRIPTION"),
 )]
 struct Args {
-    #[clap(long, default_value_t = 1000)]
+    /// Set the duration of the animation [milliseconds]
+    #[clap(long, default_value_t = 2000)]
     duration: u64,
+    /// Set the frames per second
     #[clap(long, default_value_t = 60)]
     fps: u64,
+    /// Set the chars used to model the pattern
     #[clap(long, default_value = ".:+#")]
     chars: String,
+    /// Set the pattern
     #[clap(long, value_enum)]
-    char_pattern: Vec<PatternEnum>,
+    char_pattern: Option<PatternEnum>,
+    /// Revert the pattern [possible values: true, false]
     #[clap(long)]
     char_invert: Option<bool>,
+    /// Swap the x-axis and y-axis of the pattern
     #[clap(long)]
     char_swap: Option<bool>,
+    /// Set the count of units of the pattern [default: 1-4]
     #[clap(long)]
     char_units: Option<u8>,
+    /// Set the count of slices of the pattern [default: 1-4]
     #[clap(long)]
     char_slices: Option<u8>,
+    /// Set the colors used to fill the pattern
     #[clap(long, value_enum)]
-    colors: Vec<PalletEnum>,
+    colors: Option<PalletEnum>,
+    /// Set the fill pattern
     #[clap(long, value_enum)]
-    color_pattern: Vec<PatternEnum>,
+    color_pattern: Option<PatternEnum>,
+    /// Choose if the fill pattern should move [possible values: true, false]
     #[clap(long)]
     color_shift: Option<bool>,
+    /// Revert the fill pattern
     #[clap(long)]
     color_invert: Option<bool>,
+    /// Swap the x-axis and y-axis of the fill pattern
     #[clap(long)]
     color_swap: Option<bool>,
+    /// Set the count of slices of the fill pattern [default: 1-4]
     #[clap(long)]
     color_slices: Option<u8>,
 }
 
-#[derive(ValueEnum, Clone)]
+#[derive(ValueEnum, Copy, Clone)]
 enum PalletEnum {
     Red,
     Yellow,
@@ -91,7 +105,7 @@ enum PalletEnum {
     Gray,
 }
 
-#[derive(ValueEnum, Clone)]
+#[derive(ValueEnum, Copy, Clone)]
 enum PatternEnum {
     Circle,
     Line,
@@ -100,8 +114,8 @@ enum PatternEnum {
 }
 
 #[derive(derive_more::Constructor)]
-struct PatternConfig<'a> {
-    patterns: &'a Vec<PatternEnum>,
+struct PatternConfig {
+    patterns: Option<PatternEnum>,
     shift: Option<bool>,
     invert: Option<bool>,
     swap: Option<bool>,
@@ -112,7 +126,7 @@ struct PatternConfig<'a> {
 impl Args {
     fn char_config(&self) -> PatternConfig {
         PatternConfig::new(
-            &self.char_pattern,
+            self.char_pattern,
             Some(true),
             self.char_invert,
             self.char_swap,
@@ -123,7 +137,7 @@ impl Args {
 
     fn color_config(&self) -> PatternConfig {
         PatternConfig::new(
-            &self.color_pattern,
+            self.color_pattern,
             self.color_shift,
             self.color_invert,
             self.color_swap,
@@ -133,7 +147,7 @@ impl Args {
     }
 
     fn pallet(&self, rand: &mut impl Rng) -> Vec<Color> {
-        match choose(&self.colors, rand) {
+        match choose(self.colors, rand) {
             PalletEnum::Red => vec![DarkRed, Red, White],
             PalletEnum::Yellow => vec![DarkYellow, Yellow, White],
             PalletEnum::Green => vec![DarkGreen, Green, White],
@@ -169,7 +183,7 @@ impl Args {
     }
 }
 
-impl<'a> PatternConfig<'a> {
+impl PatternConfig {
     fn create_base(&self, rand: &mut impl Rng) -> Box<dyn PatternFactory> {
         match choose(self.patterns, rand) {
             PatternEnum::Circle => Box::new(CircleFactory::default()),
@@ -203,18 +217,14 @@ impl<'a> PatternConfig<'a> {
     }
 }
 
-fn choose<TValue: ValueEnum + Clone, TRand: Rng>(
-    options: &Vec<TValue>,
-    rand: &mut TRand,
-) -> TValue {
-    if options.is_empty() {
-        TValue::value_variants()
+fn choose<TValue: ValueEnum, TRand: Rng>(opt: Option<TValue>, rand: &mut TRand) -> TValue {
+    match opt {
+        Some(value) => value.clone(),
+        None => TValue::value_variants()
             .iter()
             .choose(rand)
             .unwrap()
-            .clone()
-    } else {
-        options.iter().choose(rand).unwrap().clone()
+            .clone(),
     }
 }
 
