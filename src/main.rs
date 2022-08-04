@@ -45,6 +45,8 @@ struct Args {
     char_invert: Option<bool>,
     #[clap(long)]
     char_swap: Option<bool>,
+    #[clap(long)]
+    char_slices: Option<u8>,
     #[clap(long, value_enum)]
     colors: Vec<PalletEnum>,
     #[clap(long, value_enum)]
@@ -55,6 +57,8 @@ struct Args {
     color_invert: Option<bool>,
     #[clap(long)]
     color_swap: Option<bool>,
+    #[clap(long)]
+    color_slices: Option<u8>,
 }
 
 #[derive(ValueEnum, Clone)]
@@ -99,6 +103,7 @@ struct PatternConfig<'a> {
     shift: Option<bool>,
     invert: Option<bool>,
     swap: Option<bool>,
+    slices: Option<u8>,
 }
 
 impl Args {
@@ -108,6 +113,7 @@ impl Args {
             Some(true),
             self.char_invert,
             self.char_swap,
+            self.char_slices,
         )
     }
 
@@ -117,6 +123,7 @@ impl Args {
             self.color_shift,
             self.color_invert,
             self.color_swap,
+            self.color_slices,
         )
     }
 
@@ -169,6 +176,7 @@ impl<'a> PatternConfig<'a> {
 
     fn create(&self, rand: &mut impl Rng) -> Box<dyn PatternFactory> {
         let mut pattern = self.create_base(rand);
+        let slices = self.slices.unwrap_or(rand.gen_range(1..=4));
 
         if self.shift.unwrap_or(rand.gen()) {
             pattern = Box::new(ShiftFactory::new(pattern))
@@ -178,6 +186,9 @@ impl<'a> PatternConfig<'a> {
         }
         if self.swap.unwrap_or(rand.gen()) {
             pattern = Box::new(SwapFactory::new(pattern))
+        }
+        if slices != 1 {
+            pattern = Box::new(SliceFactory::new(pattern, slices));
         }
         pattern
     }
