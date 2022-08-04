@@ -32,6 +32,10 @@ impl Vector {
     pub fn angle(&self) -> f32 {
         self.y.atan2(self.x)
     }
+
+    pub fn swap(&self) -> Vector {
+        Self::new(self.y, self.x)
+    }
 }
 
 #[cfg(test)]
@@ -69,5 +73,10 @@ mod test {
     #[test]
     fn angle() {
         assert_abs_diff_eq!(-1.5, Vector::new(2.0, -20.0).angle(), epsilon = 0.1);
+    }
+
+    #[test]
+    fn swap() {
+        assert_eq!(Vector::new(7.0, 2.0), Vector::new(2.0, 7.0).swap());
     }
 }

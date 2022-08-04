@@ -43,6 +43,8 @@ struct Args {
     char_pattern: Vec<PatternEnum>,
     #[clap(long)]
     char_invert: Option<bool>,
+    #[clap(long)]
+    char_swap: Option<bool>,
     #[clap(long, value_enum)]
     colors: Vec<PalletEnum>,
     #[clap(long, value_enum)]
@@ -51,6 +53,8 @@ struct Args {
     color_shift: Option<bool>,
     #[clap(long)]
     color_invert: Option<bool>,
+    #[clap(long)]
+    color_swap: Option<bool>,
 }
 
 #[derive(ValueEnum, Clone)]
@@ -94,15 +98,26 @@ struct PatternConfig<'a> {
     patterns: &'a Vec<PatternEnum>,
     shift: Option<bool>,
     invert: Option<bool>,
+    swap: Option<bool>,
 }
 
 impl Args {
     fn char_config(&self) -> PatternConfig {
-        PatternConfig::new(&self.char_pattern, Some(true), self.char_invert)
+        PatternConfig::new(
+            &self.char_pattern,
+            Some(true),
+            self.char_invert,
+            self.char_swap,
+        )
     }
 
     fn color_config(&self) -> PatternConfig {
-        PatternConfig::new(&self.color_pattern, self.color_shift, self.color_invert)
+        PatternConfig::new(
+            &self.color_pattern,
+            self.color_shift,
+            self.color_invert,
+            self.color_swap,
+        )
     }
 
     fn pallet(&self, rand: &mut impl Rng) -> Vec<Color> {
@@ -160,6 +175,9 @@ impl<'a> PatternConfig<'a> {
         }
         if self.invert.unwrap_or(rand.gen()) {
             pattern = Box::new(InvertFactory::new(pattern))
+        }
+        if self.swap.unwrap_or(rand.gen()) {
+            pattern = Box::new(SwapFactory::new(pattern))
         }
         pattern
     }
