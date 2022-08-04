@@ -41,12 +41,16 @@ struct Args {
     chars: String,
     #[clap(long, value_enum)]
     char_pattern: Vec<PatternEnum>,
+    #[clap(long)]
+    char_invert: Option<bool>,
     #[clap(long, value_enum)]
     colors: Vec<PalletEnum>,
     #[clap(long, value_enum)]
     color_pattern: Vec<PatternEnum>,
     #[clap(long)]
     color_shift: Option<bool>,
+    #[clap(long)]
+    color_invert: Option<bool>,
 }
 
 #[derive(ValueEnum, Clone)]
@@ -89,15 +93,16 @@ enum PatternEnum {
 struct PatternConfig<'a> {
     patterns: &'a Vec<PatternEnum>,
     shift: Option<bool>,
+    invert: Option<bool>,
 }
 
 impl Args {
     fn char_config(&self) -> PatternConfig {
-        PatternConfig::new(&self.char_pattern, Some(true))
+        PatternConfig::new(&self.char_pattern, Some(true), self.char_invert)
     }
 
     fn color_config(&self) -> PatternConfig {
-        PatternConfig::new(&self.color_pattern, self.color_shift)
+        PatternConfig::new(&self.color_pattern, self.color_shift, self.color_invert)
     }
 
     fn pallet(&self, rand: &mut impl Rng) -> Vec<Color> {
@@ -152,6 +157,9 @@ impl<'a> PatternConfig<'a> {
 
         if self.shift.unwrap_or(rand.gen()) {
             pattern = Box::new(ShiftFactory::new(pattern))
+        }
+        if self.invert.unwrap_or(rand.gen()) {
+            pattern = Box::new(InvertFactory::new(pattern))
         }
         pattern
     }
