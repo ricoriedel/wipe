@@ -40,7 +40,7 @@ mod test {
             size: Vector::new(10.0, 5.0),
             step: 0.0,
         };
-        let pattern = Rhombus::new(&config);
+        let pattern = RhombusFactory::default().create(&config);
 
         assert_abs_diff_eq!(1.0, pattern.sample(Vector::new(0.0, 0.0)), epsilon = 0.1);
         assert_abs_diff_eq!(1.0, pattern.sample(Vector::new(10.0, 5.0)), epsilon = 0.1);

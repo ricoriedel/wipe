@@ -73,6 +73,7 @@ impl Sampler for SamplerImpl {
 #[cfg(test)]
 mod test {
     use super::*;
+    use approx::*;
     use mockall::predicate::eq;
 
     #[test]
@@ -86,7 +87,7 @@ mod test {
 
         let sampler = SamplerImpl::new(Box::new(char), Box::new(color));
 
-        assert_eq!(2.5, sampler.char(Vector::new(2.0, 5.0)));
+        assert_abs_diff_eq!(2.5, sampler.char(Vector::new(2.0, 5.0)));
     }
 
     #[test]
@@ -101,6 +102,37 @@ mod test {
 
         let sampler = SamplerImpl::new(Box::new(char), Box::new(color));
 
-        assert_eq!(3.2, sampler.color(Vector::new(4.0, 2.0)));
+        assert_abs_diff_eq!(3.2, sampler.color(Vector::new(4.0, 2.0)));
+    }
+
+    #[test]
+    fn factory() {
+        let mut char = MockPatternFactory::new();
+        let mut color = MockPatternFactory::new();
+        let config = Config {
+            size: Vector::new(2.0, 3.0),
+            step: 0.6,
+        };
+
+        char.expect_create().with(eq(config)).once().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler.expect_sample().return_const(3.0);
+            Box::new(sampler)
+        });
+        color
+            .expect_create()
+            .with(eq(config))
+            .once()
+            .returning(|_| {
+                let mut sampler = MockPattern::new();
+                sampler.expect_sample().return_const(5.0);
+                Box::new(sampler)
+            });
+
+        let factory = SamplerFactoryImpl::new(Box::new(char), Box::new(color));
+        let sampler = factory.create(&config);
+
+        assert_abs_diff_eq!(3.0, sampler.char(Vector::default()));
+        assert_abs_diff_eq!(5.0, sampler.color(Vector::default()));
     }
 }

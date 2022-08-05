@@ -39,7 +39,7 @@ mod test {
             size: Vector::new(10.0, 20.0),
             step: 0.0,
         };
-        let pattern = Wheel::new(&config);
+        let pattern = WheelFactory::default().create(&config);
 
         assert_abs_diff_eq!(0.0, pattern.sample(Vector::new(0.0, 9.0)), epsilon = 0.1);
         assert_abs_diff_eq!(1.0, pattern.sample(Vector::new(0.0, 10.0)), epsilon = 0.1);

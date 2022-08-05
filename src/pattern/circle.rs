@@ -40,7 +40,7 @@ mod test {
             size: Vector::new(10.0, 20.0),
             step: 0.0,
         };
-        let pattern = Circle::new(&config);
+        let pattern = CircleFactory::default().create(&config);
 
         assert_abs_diff_eq!(1.0, pattern.sample(Vector::new(0.0, 0.0)), epsilon = 0.1);
         assert_abs_diff_eq!(0.0, pattern.sample(Vector::new(5.0, 10.0)), epsilon = 0.1);

@@ -38,7 +38,7 @@ mod test {
             size: Vector::new(20.0, 0.0),
             step: 0.0,
         };
-        let pattern = Line::new(&config);
+        let pattern = LineFactory::default().create(&config);
 
         assert_abs_diff_eq!(0.0, pattern.sample(Vector::new(0.0, 4.0)), epsilon = 0.1);
         assert_abs_diff_eq!(0.4, pattern.sample(Vector::new(8.0, 8.0)), epsilon = 0.1);
