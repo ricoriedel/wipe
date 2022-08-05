@@ -38,6 +38,7 @@ impl Pattern for Slice {
 mod test {
     use super::*;
     use crate::MockPatternFactory;
+    use approx::*;
     use mockall::predicate::eq;
 
     #[test]
@@ -67,7 +68,7 @@ mod test {
 
         let sampler = SliceFactory::new(Box::new(child), 4).create(&Config::default());
 
-        assert_eq!(1.0, sampler.sample(Vector::default()));
+        assert_abs_diff_eq!(1.0, sampler.sample(Vector::default()));
     }
 
     #[test]
@@ -81,7 +82,7 @@ mod test {
 
         let sampler = SliceFactory::new(Box::new(child), 4).create(&Config::default());
 
-        assert_eq!(0.0, sampler.sample(Vector::default()));
+        assert_abs_diff_eq!(0.0, sampler.sample(Vector::default()));
     }
 
     #[test]

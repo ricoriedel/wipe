@@ -30,6 +30,7 @@ impl Pattern for Invert {
 mod test {
     use super::*;
     use crate::MockPatternFactory;
+    use approx::*;
     use mockall::predicate::eq;
 
     #[test]
@@ -62,7 +63,7 @@ mod test {
 
         let sampler = InvertFactory::new(Box::new(child)).create(&Config::default());
 
-        assert_eq!(0.3, sampler.sample(Vector::default()));
+        assert_abs_diff_eq!(0.3, sampler.sample(Vector::default()));
     }
 
     #[test]
