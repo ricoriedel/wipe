@@ -186,10 +186,10 @@ impl Args {
 impl PatternConfig {
     fn create_base(&self, rand: &mut impl Rng) -> Box<dyn PatternFactory> {
         match choose(self.patterns, rand) {
-            PatternEnum::Circle => Box::new(CircleFactory::default()),
-            PatternEnum::Line => Box::new(LineFactory::default()),
-            PatternEnum::Rhombus => Box::new(RhombusFactory::default()),
-            PatternEnum::Wheel => Box::new(WheelFactory::default()),
+            PatternEnum::Circle => Box::new(CircleFactory::new()),
+            PatternEnum::Line => Box::new(LineFactory::new()),
+            PatternEnum::Rhombus => Box::new(RhombusFactory::new()),
+            PatternEnum::Wheel => Box::new(WheelFactory::new()),
         }
     }
 
@@ -244,7 +244,7 @@ fn main() -> Result<(), Error> {
     let printer = PrinterImpl::new(term)?;
     let renderer = RendererImpl::new(sampler, converter, printer);
 
-    let clock = ClockImpl::default();
+    let clock = ClockImpl::new();
     let duration = Duration::from_millis(args.duration);
     let delay = Duration::from_nanos(1_000_000_000 / args.fps);
     let timer = Timer::new(clock, duration, delay);

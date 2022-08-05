@@ -9,7 +9,7 @@ pub trait Clock {
     fn sleep(&self, duration: Duration);
 }
 
-#[derive(Default)]
+#[derive(derive_more::Constructor)]
 pub struct ClockImpl;
 
 impl Clock for ClockImpl {

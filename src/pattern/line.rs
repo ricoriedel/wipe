@@ -1,7 +1,7 @@
 use crate::pattern::*;
 use crate::Vector;
 
-#[derive(Default)]
+#[derive(derive_more::Constructor)]
 pub struct LineFactory;
 pub struct Line {
     width: f32,
@@ -38,7 +38,7 @@ mod test {
             size: Vector::new(20.0, 0.0),
             step: 0.0,
         };
-        let pattern = LineFactory::default().create(&config);
+        let pattern = LineFactory::new().create(&config);
 
         assert_abs_diff_eq!(0.0, pattern.sample(Vector::new(0.0, 4.0)), epsilon = 0.1);
         assert_abs_diff_eq!(0.4, pattern.sample(Vector::new(8.0, 8.0)), epsilon = 0.1);
