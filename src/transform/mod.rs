@@ -1,11 +1,11 @@
 mod invert;
+mod segment;
 mod shift;
 mod slice;
 mod swap;
-mod units;
 
 pub use invert::*;
+pub use segment::*;
 pub use shift::*;
 pub use slice::*;
 pub use swap::*;
-pub use units::*;

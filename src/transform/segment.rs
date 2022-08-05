@@ -2,29 +2,29 @@ use crate::pattern::*;
 use crate::Vector;
 
 #[derive(derive_more::Constructor)]
-pub struct UnitsFactory {
+pub struct SegmentsFactory {
     child: Box<dyn PatternFactory>,
-    units: u8,
+    segments: u8,
 }
 
 #[derive(derive_more::Constructor)]
-pub struct Units {
+pub struct Segments {
     child: Box<dyn Pattern>,
-    units: u8,
+    segments: u8,
 }
 
-impl PatternFactory for UnitsFactory {
+impl PatternFactory for SegmentsFactory {
     fn create(&self, config: &Config) -> Box<dyn Pattern> {
-        Box::new(Units::new(self.child.create(config), self.units))
+        Box::new(Segments::new(self.child.create(config), self.segments))
     }
 }
 
-impl Pattern for Units {
+impl Pattern for Segments {
     fn sample(&self, pos: Vector) -> f32 {
         let sample = self.child.sample(pos);
 
         if 0.0 <= sample && sample < 1.0 {
-            (sample * self.units as f32) % 1.0
+            (sample * self.segments as f32) % 1.0
         } else {
             sample
         }
@@ -51,7 +51,7 @@ mod test {
             .once()
             .returning(|_| Box::new(MockPattern::new()));
 
-        UnitsFactory::new(Box::new(child), 2).create(&config);
+        SegmentsFactory::new(Box::new(child), 2).create(&config);
     }
 
     #[test]
@@ -63,7 +63,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+        let sampler = SegmentsFactory::new(Box::new(child), 4).create(&Config::default());
 
         assert_abs_diff_eq!(0.96, sampler.sample(Vector::default()), epsilon = 0.01);
     }
@@ -77,7 +77,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+        let sampler = SegmentsFactory::new(Box::new(child), 4).create(&Config::default());
 
         assert_abs_diff_eq!(0.0, sampler.sample(Vector::default()));
     }
@@ -91,7 +91,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+        let sampler = SegmentsFactory::new(Box::new(child), 4).create(&Config::default());
 
         assert_eq!(0.96, sampler.sample(Vector::default()));
     }
@@ -105,7 +105,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+        let sampler = SegmentsFactory::new(Box::new(child), 4).create(&Config::default());
 
         assert_abs_diff_eq!(0.0, sampler.sample(Vector::default()));
     }
@@ -123,7 +123,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = UnitsFactory::new(Box::new(child), 3).create(&Config::default());
+        let sampler = SegmentsFactory::new(Box::new(child), 3).create(&Config::default());
 
         sampler.sample(Vector::new(5.0, 1.0));
     }

@@ -51,9 +51,9 @@ struct Args {
     /// Swap the x-axis and y-axis of the pattern
     #[clap(long)]
     char_swap: Option<bool>,
-    /// Set the count of units of the pattern [default: 1-4]
+    /// Set the count of segments of the pattern [default: 1-4]
     #[clap(long)]
-    char_units: Option<u8>,
+    char_segments: Option<u8>,
     /// Set the count of slices of the pattern [default: 1-4]
     #[clap(long)]
     char_slices: Option<u8>,
@@ -119,7 +119,7 @@ struct PatternConfig {
     shift: Option<bool>,
     invert: Option<bool>,
     swap: Option<bool>,
-    units: Option<u8>,
+    segments: Option<u8>,
     slices: Option<u8>,
 }
 
@@ -130,7 +130,7 @@ impl Args {
             Some(true),
             self.char_invert,
             self.char_swap,
-            self.char_units,
+            self.char_segments,
             self.char_slices,
         )
     }
@@ -195,7 +195,7 @@ impl PatternConfig {
 
     fn create(&self, rand: &mut impl Rng) -> Box<dyn PatternFactory> {
         let mut pattern = self.create_base(rand);
-        let units = self.units.unwrap_or(rand.gen_range(1..=4));
+        let segments = self.segments.unwrap_or(rand.gen_range(1..=4));
         let slices = self.slices.unwrap_or(rand.gen_range(1..=4));
 
         if self.shift.unwrap_or(rand.gen()) {
@@ -207,8 +207,8 @@ impl PatternConfig {
         if self.swap.unwrap_or(rand.gen()) {
             pattern = Box::new(SwapFactory::new(pattern))
         }
-        if units != 1 {
-            pattern = Box::new(UnitsFactory::new(pattern, units));
+        if segments != 1 {
+            pattern = Box::new(SegmentsFactory::new(pattern, segments));
         }
         if slices != 1 {
             pattern = Box::new(SliceFactory::new(pattern, slices));
