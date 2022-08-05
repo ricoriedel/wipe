@@ -10,12 +10,13 @@ pub use wheel::*;
 
 use crate::Vector;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Default, PartialEq, Debug)]
 pub struct Config {
     pub size: Vector,
     pub step: f32,
 }
 
+#[cfg_attr(test, mockall::automock)]
 pub trait PatternFactory {
     fn create(&self, config: &Config) -> Box<dyn Pattern>;
 }
