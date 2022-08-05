@@ -30,3 +30,101 @@ impl Pattern for Units {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::MockPatternFactory;
+    use approx::*;
+    use mockall::predicate::eq;
+
+    #[test]
+    fn create_config_correct() {
+        let config = Config {
+            size: Vector::new(6.0, 3.0),
+            step: 0.4,
+        };
+        let mut child = MockPatternFactory::new();
+        child
+            .expect_create()
+            .with(eq(config))
+            .once()
+            .returning(|_| Box::new(MockPattern::new()));
+
+        UnitsFactory::new(Box::new(child), 2).create(&config);
+    }
+
+    #[test]
+    fn sample_second_segment_begins_with_one() {
+        let mut child = MockPatternFactory::new();
+        child.expect_create().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler.expect_sample().return_const(0.74);
+            Box::new(sampler)
+        });
+
+        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+
+        assert_abs_diff_eq!(0.96, sampler.sample(Vector::default()), epsilon = 0.01);
+    }
+
+    #[test]
+    fn sample_second_segment_ends_with_zero() {
+        let mut child = MockPatternFactory::new();
+        child.expect_create().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler.expect_sample().return_const(0.5);
+            Box::new(sampler)
+        });
+
+        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+
+        assert_abs_diff_eq!(0.0, sampler.sample(Vector::default()));
+    }
+
+    #[test]
+    fn sample_last_segment_begins_with_one() {
+        let mut child = MockPatternFactory::new();
+        child.expect_create().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler.expect_sample().return_const(0.24);
+            Box::new(sampler)
+        });
+
+        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+
+        assert_eq!(0.96, sampler.sample(Vector::default()));
+    }
+
+    #[test]
+    fn sample_last_segment_ends_with_zero() {
+        let mut child = MockPatternFactory::new();
+        child.expect_create().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler.expect_sample().return_const(0.0);
+            Box::new(sampler)
+        });
+
+        let sampler = UnitsFactory::new(Box::new(child), 4).create(&Config::default());
+
+        assert_abs_diff_eq!(0.0, sampler.sample(Vector::default()));
+    }
+
+    #[test]
+    fn sample_pos_correct() {
+        let mut child = MockPatternFactory::new();
+        child.expect_create().once().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler
+                .expect_sample()
+                .with(eq(Vector::new(5.0, 1.0)))
+                .once()
+                .return_const(0.0);
+            Box::new(sampler)
+        });
+
+        let sampler = UnitsFactory::new(Box::new(child), 3).create(&Config::default());
+
+        sampler.sample(Vector::new(5.0, 1.0));
+    }
+}
