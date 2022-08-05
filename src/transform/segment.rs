@@ -55,6 +55,34 @@ mod test {
     }
 
     #[test]
+    fn sample_above_one_untouched() {
+        let mut child = MockPatternFactory::new();
+        child.expect_create().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler.expect_sample().return_const(1.1);
+            Box::new(sampler)
+        });
+
+        let sampler = SegmentsFactory::new(Box::new(child), 3).create(&Config::default());
+
+        assert_abs_diff_eq!(1.1, sampler.sample(Vector::default()));
+    }
+
+    #[test]
+    fn sample_below_zero_untouched() {
+        let mut child = MockPatternFactory::new();
+        child.expect_create().returning(|_| {
+            let mut sampler = MockPattern::new();
+            sampler.expect_sample().return_const(-0.1);
+            Box::new(sampler)
+        });
+
+        let sampler = SegmentsFactory::new(Box::new(child), 3).create(&Config::default());
+
+        assert_abs_diff_eq!(-0.1, sampler.sample(Vector::default()));
+    }
+
+    #[test]
     fn sample_second_segment_begins_with_one() {
         let mut child = MockPatternFactory::new();
         child.expect_create().returning(|_| {
