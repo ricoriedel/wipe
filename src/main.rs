@@ -19,7 +19,8 @@ pub use vec::*;
 use crate::convert::*;
 use crate::pattern::*;
 use crate::transform::*;
-use clap::{Parser, ValueEnum};
+use clap::builder::NonEmptyStringValueParser;
+use clap::{value_parser, Parser, ValueEnum};
 use crossterm::style::Color;
 use crossterm::style::Color::*;
 use rand::prelude::*;
@@ -33,29 +34,29 @@ use std::time::Duration;
     about   = env!("CARGO_PKG_DESCRIPTION"),
 )]
 struct Args {
-    /// Set the duration of the animation [milliseconds]
-    #[clap(long, default_value_t = 2000)]
+    /// Set the animation duration [milliseconds]
+    #[clap(long, default_value_t = 2000, value_parser = value_parser!(u64).range(0..=60_000))]
     duration: u64,
     /// Set the frames per second
-    #[clap(long, default_value_t = 60)]
+    #[clap(long, default_value_t = 60, value_parser = value_parser!(u64).range(1..=480))]
     fps: u64,
     /// Set the chars used to model the pattern
-    #[clap(long, default_value = ".:+#")]
+    #[clap(long, default_value = ".:+#", value_parser = NonEmptyStringValueParser::new())]
     chars: String,
     /// Set the pattern
     #[clap(long, value_enum)]
     char_pattern: Option<PatternEnum>,
-    /// Revert the pattern [possible values: true, false]
+    /// Invert the pattern
     #[clap(long)]
     char_invert: Option<bool>,
     /// Swap the x-axis and y-axis of the pattern
     #[clap(long)]
     char_swap: Option<bool>,
-    /// Set the count of segments of the pattern [default: 1-4]
-    #[clap(long)]
+    /// Set the segment count of the pattern [default: 1-4]
+    #[clap(long, value_parser = value_parser!(u8).range(1..255))]
     char_segments: Option<u8>,
-    /// Set the count of slices of the pattern [default: 1-4]
-    #[clap(long)]
+    /// Set the slice count of the pattern  [default: 1-4]
+    #[clap(long, value_parser = value_parser!(u8).range(1..255))]
     char_slices: Option<u8>,
     /// Set the colors used to fill the pattern
     #[clap(long, value_enum)]
@@ -63,17 +64,17 @@ struct Args {
     /// Set the fill pattern
     #[clap(long, value_enum)]
     color_pattern: Option<PatternEnum>,
-    /// Choose if the fill pattern should move [possible values: true, false]
+    /// Choose if the fill pattern should move
     #[clap(long)]
     color_shift: Option<bool>,
-    /// Revert the fill pattern
+    /// Invert the fill pattern
     #[clap(long)]
     color_invert: Option<bool>,
     /// Swap the x-axis and y-axis of the fill pattern
     #[clap(long)]
     color_swap: Option<bool>,
-    /// Set the count of slices of the fill pattern [default: 1-4]
-    #[clap(long)]
+    /// Set the slice count of the fill pattern [default: 1-4]
+    #[clap(long, value_parser = value_parser!(u8).range(1..255))]
     color_slices: Option<u8>,
 }
 

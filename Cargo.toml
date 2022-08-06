@@ -5,7 +5,7 @@ edition = "2021"
 description = "Wipe the content of your terminal."
 license = "MIT"
 repository = "https://github.com/ricoriedel/wipe"
-authors = ["Rico Riedel"]
+authors = ["Rico Riedel <rico.riedel@protonmail.ch>"]
 
 [dependencies]
 clap = { version = "3.2", features = ["derive"] }
