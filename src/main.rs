@@ -26,7 +26,7 @@ use rand::prelude::*;
 use std::io::stdout;
 use std::time::Duration;
 
-#[derive(Parser)]
+#[derive(Parser, Default)]
 #[clap(
     author  = env!("CARGO_PKG_AUTHORS"),
     version = env!("CARGO_PKG_VERSION"),
@@ -105,7 +105,7 @@ enum PalletEnum {
     Gray,
 }
 
-#[derive(ValueEnum, Copy, Clone)]
+#[derive(ValueEnum, Copy, Clone, PartialEq, Debug)]
 enum PatternEnum {
     Circle,
     Line,
@@ -115,39 +115,39 @@ enum PatternEnum {
 
 #[derive(derive_more::Constructor)]
 struct PatternConfig {
-    patterns: Option<PatternEnum>,
-    shift: Option<bool>,
-    invert: Option<bool>,
-    swap: Option<bool>,
-    segments: Option<u8>,
-    slices: Option<u8>,
+    pattern: PatternEnum,
+    shift: bool,
+    invert: bool,
+    swap: bool,
+    segments: u8,
+    slices: u8,
 }
 
 impl Args {
-    fn char_config(&self) -> PatternConfig {
+    fn char_config(&self, rng: &mut impl Rng) -> PatternConfig {
         PatternConfig::new(
-            self.char_pattern,
-            Some(true),
-            self.char_invert,
-            self.char_swap,
-            self.char_segments,
-            self.char_slices,
+            choose(self.char_pattern, rng),
+            true,
+            self.char_invert.unwrap_or(rng.gen()),
+            self.char_swap.unwrap_or(rng.gen()),
+            self.char_segments.unwrap_or(rng.gen_range(1..=4)),
+            self.char_slices.unwrap_or(rng.gen_range(1..=4)),
         )
     }
 
-    fn color_config(&self) -> PatternConfig {
+    fn color_config(&self, rng: &mut impl Rng) -> PatternConfig {
         PatternConfig::new(
-            self.color_pattern,
-            self.color_shift,
-            self.color_invert,
-            self.color_swap,
-            Some(1),
-            self.color_slices,
+            choose(self.color_pattern, rng),
+            self.color_shift.unwrap_or(rng.gen()),
+            self.color_invert.unwrap_or(rng.gen()),
+            self.color_swap.unwrap_or(rng.gen()),
+            1,
+            self.color_slices.unwrap_or(rng.gen_range(1..=4)),
         )
     }
 
-    fn pallet(&self, rand: &mut impl Rng) -> Vec<Color> {
-        match choose(self.colors, rand) {
+    fn pallet(&self, rng: &mut impl Rng) -> Vec<Color> {
+        match choose(self.colors, rng) {
             PalletEnum::Red => vec![DarkRed, Red, White],
             PalletEnum::Yellow => vec![DarkYellow, Yellow, White],
             PalletEnum::Green => vec![DarkGreen, Green, White],
@@ -181,11 +181,19 @@ impl Args {
             PalletEnum::Gray => vec![Black, DarkGrey, Grey, White],
         }
     }
+
+    fn duration(&self) -> Duration {
+        Duration::from_millis(self.duration)
+    }
+
+    fn delay(&self) -> Duration {
+        Duration::from_nanos(1_000_000_000 / self.fps)
+    }
 }
 
 impl PatternConfig {
-    fn create_base(&self, rand: &mut impl Rng) -> Box<dyn PatternFactory> {
-        match choose(self.patterns, rand) {
+    fn create_base(&self) -> Box<dyn PatternFactory> {
+        match self.pattern {
             PatternEnum::Circle => Box::new(CircleFactory::new()),
             PatternEnum::Line => Box::new(LineFactory::new()),
             PatternEnum::Rhombus => Box::new(RhombusFactory::new()),
@@ -193,38 +201,32 @@ impl PatternConfig {
         }
     }
 
-    fn create(&self, rand: &mut impl Rng) -> Box<dyn PatternFactory> {
-        let mut pattern = self.create_base(rand);
-        let segments = self.segments.unwrap_or(rand.gen_range(1..=4));
-        let slices = self.slices.unwrap_or(rand.gen_range(1..=4));
+    fn create(&self) -> Box<dyn PatternFactory> {
+        let mut pattern = self.create_base();
 
-        if self.shift.unwrap_or(rand.gen()) {
+        if self.shift {
             pattern = Box::new(ShiftFactory::new(pattern))
         }
-        if self.invert.unwrap_or(rand.gen()) {
+        if self.invert {
             pattern = Box::new(InvertFactory::new(pattern))
         }
-        if self.swap.unwrap_or(rand.gen()) {
+        if self.swap {
             pattern = Box::new(SwapFactory::new(pattern))
         }
-        if segments != 1 {
-            pattern = Box::new(SegmentsFactory::new(pattern, segments));
+        if self.segments != 1 {
+            pattern = Box::new(SegmentsFactory::new(pattern, self.segments));
         }
-        if slices != 1 {
-            pattern = Box::new(SliceFactory::new(pattern, slices));
+        if self.slices != 1 {
+            pattern = Box::new(SliceFactory::new(pattern, self.slices));
         }
         pattern
     }
 }
 
-fn choose<TValue: ValueEnum, TRand: Rng>(opt: Option<TValue>, rand: &mut TRand) -> TValue {
+fn choose<TValue: ValueEnum, TRand: Rng>(opt: Option<TValue>, rng: &mut TRand) -> TValue {
     match opt {
         Some(value) => value.clone(),
-        None => TValue::value_variants()
-            .iter()
-            .choose(rand)
-            .unwrap()
-            .clone(),
+        None => TValue::value_variants().iter().choose(rng).unwrap().clone(),
     }
 }
 
@@ -232,9 +234,11 @@ fn main() -> Result<(), Error> {
     let args = Args::parse();
     let rand = &mut thread_rng();
 
-    let char = args.char_config().create(rand);
-    let color = args.color_config().create(rand);
+    let char = args.char_config(rand).create();
+    let color = args.color_config(rand).create();
     let pallet = args.pallet(rand);
+    let duration = args.duration();
+    let delay = args.delay();
 
     let sampler = SamplerFactoryImpl::new(char, color);
     let char_converter = CharConverterImpl::new(args.chars);
@@ -245,9 +249,178 @@ fn main() -> Result<(), Error> {
     let renderer = RendererImpl::new(sampler, converter, printer);
 
     let clock = ClockImpl::new();
-    let duration = Duration::from_millis(args.duration);
-    let delay = Duration::from_nanos(1_000_000_000 / args.fps);
     let timer = Timer::new(clock, duration, delay);
 
     timer.run(renderer)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rand::rngs::mock::StepRng;
+
+    #[test]
+    fn args_pallet_all_defined() {
+        let rand = &mut StepRng::new(1, 1);
+
+        for value in PalletEnum::value_variants() {
+            let args = Args {
+                colors: Some(*value),
+                ..Args::default()
+            };
+            assert!(args.pallet(rand).len() > 0);
+        }
+    }
+
+    #[test]
+    fn duration() {
+        let args = Args {
+            duration: 3500,
+            ..Args::default()
+        };
+        assert_eq!(Duration::from_secs_f32(3.5), args.duration());
+    }
+
+    #[test]
+    fn delay() {
+        let args = Args {
+            fps: 20,
+            ..Args::default()
+        };
+        assert_eq!(Duration::from_secs_f32(0.05), args.delay());
+    }
+
+    #[test]
+    fn char_config_pattern() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            char_pattern: Some(PatternEnum::Line),
+            ..Args::default()
+        };
+        assert_eq!(PatternEnum::Line, args.char_config(rng).pattern);
+    }
+
+    #[test]
+    fn char_config_invert() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            char_invert: Some(false),
+            ..Args::default()
+        };
+        assert_eq!(false, args.char_config(rng).invert);
+    }
+
+    #[test]
+    fn char_config_shift() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args::default();
+
+        assert_eq!(true, args.char_config(rng).shift);
+    }
+
+    #[test]
+    fn char_config_swap() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            char_swap: Some(true),
+            ..Args::default()
+        };
+        assert_eq!(true, args.char_config(rng).swap);
+    }
+
+    #[test]
+    fn char_config_segments() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            char_segments: Some(12),
+            ..Args::default()
+        };
+        assert_eq!(12, args.char_config(rng).segments);
+    }
+
+    #[test]
+    fn char_config_slices() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            char_slices: Some(42),
+            ..Args::default()
+        };
+        assert_eq!(42, args.char_config(rng).slices);
+    }
+
+    #[test]
+    fn color_config_pattern() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            color_pattern: Some(PatternEnum::Circle),
+            ..Args::default()
+        };
+        assert_eq!(PatternEnum::Circle, args.color_config(rng).pattern);
+    }
+
+    #[test]
+    fn color_config_invert() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            color_invert: Some(true),
+            ..Args::default()
+        };
+        assert_eq!(true, args.color_config(rng).invert);
+    }
+
+    #[test]
+    fn color_config_shift() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            color_shift: Some(false),
+            ..Args::default()
+        };
+        assert_eq!(false, args.color_config(rng).shift);
+    }
+
+    #[test]
+    fn color_config_swap() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            color_swap: Some(true),
+            ..Args::default()
+        };
+        assert_eq!(true, args.color_config(rng).swap);
+    }
+
+    #[test]
+    fn color_config_segments() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args::default();
+
+        assert_eq!(1, args.color_config(rng).segments);
+    }
+
+    #[test]
+    fn color_config_slices() {
+        let rng = &mut StepRng::new(1, 1);
+        let args = Args {
+            color_slices: Some(23),
+            ..Args::default()
+        };
+        assert_eq!(23, args.color_config(rng).slices);
+    }
+
+    #[test]
+    fn pattern_config_all_defined() {
+        for value in PatternEnum::value_variants() {
+            let config = PatternConfig {
+                pattern: *value,
+                shift: true,
+                invert: true,
+                swap: true,
+                segments: 3,
+                slices: 2,
+            };
+            config
+                .create()
+                .create(&Config::default())
+                .sample(Vector::default());
+        }
+    }
 }
