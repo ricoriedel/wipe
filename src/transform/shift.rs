@@ -50,8 +50,8 @@ mod test {
     #[test]
     fn sample_shifted() {
         let config = Config {
-            size: Vector::default(),
             step: 0.4,
+            ..Config::default()
         };
         let mut child = MockPatternFactory::new();
         child.expect_create().returning(|_| {

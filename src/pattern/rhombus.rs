@@ -38,7 +38,7 @@ mod test {
     fn sample() {
         let config = Config {
             size: Vector::new(10.0, 5.0),
-            step: 0.0,
+            ..Config::default()
         };
         let pattern = RhombusFactory::new().create(&config);
 

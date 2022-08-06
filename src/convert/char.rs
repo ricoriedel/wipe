@@ -11,15 +11,14 @@ pub trait CharConverter {
 }
 
 pub struct CharConverterImpl {
-    chars: String,
-    count: f32,
+    chars: Vec<char>,
 }
 
 impl CharConverterImpl {
     pub fn new(chars: String) -> Self {
-        let count = chars.chars().count() as f32;
+        let chars = chars.chars().collect();
 
-        Self { chars, count }
+        Self { chars }
     }
 }
 
@@ -28,10 +27,10 @@ impl CharConverter for CharConverterImpl {
         if level < 0.0 {
             CharSample::Clear
         } else if level < 1.0 {
-            let index = (level * self.count) as usize;
-            let char = self.chars.chars().nth(index).unwrap();
+            let len = self.chars.len() as f32;
+            let index = (level * len) as usize;
 
-            CharSample::Draw(char)
+            CharSample::Draw(self.chars[index])
         } else {
             CharSample::Keep
         }

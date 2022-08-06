@@ -36,7 +36,7 @@ mod test {
     fn sample() {
         let config = Config {
             size: Vector::new(20.0, 0.0),
-            step: 0.0,
+            ..Config::default()
         };
         let pattern = LineFactory::new().create(&config);
 
