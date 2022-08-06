@@ -1,20 +1,27 @@
+/// A sample for a terminal cell.
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum CharSample {
+    /// Keep the char.
     Keep,
+    /// Override the char.
     Draw(char),
+    /// Clear the char.
     Clear,
 }
 
+/// A trait to convert a sample to a [CharSample].
 #[cfg_attr(test, mockall::automock)]
 pub trait CharConverter {
     fn convert(&self, level: f32) -> CharSample;
 }
 
+/// The implementation of [CharConverter].
 pub struct CharConverterImpl {
     chars: Vec<char>,
 }
 
 impl CharConverterImpl {
+    /// The chars used for mapping.
     pub fn new(chars: String) -> Self {
         let chars = chars.chars().collect();
 

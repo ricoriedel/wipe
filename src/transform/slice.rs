@@ -1,12 +1,14 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Slice].
 pub struct SliceFactory {
     child: Box<dyn PatternFactory>,
     width: f32,
     rest: f32,
 }
 
+/// Reduces the width of the child [Pattern] to one over `n`.
 #[derive(derive_more::Constructor)]
 pub struct Slice {
     child: Box<dyn Pattern>,

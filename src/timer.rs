@@ -3,12 +3,17 @@ use crate::Renderer;
 use std::thread;
 use std::time::{Duration, Instant};
 
+/// A stub for the system clock.
 #[cfg_attr(test, mockall::automock)]
 pub trait Clock {
+    /// Returns the current time.
     fn now(&self) -> Instant;
+
+    /// Sleep for the given duration.
     fn sleep(&self, duration: Duration);
 }
 
+/// The implementation of [Clock].
 #[derive(derive_more::Constructor)]
 pub struct ClockImpl;
 
@@ -22,6 +27,7 @@ impl Clock for ClockImpl {
     }
 }
 
+/// A timer for rendering.
 #[derive(derive_more::Constructor)]
 pub struct Timer<T> {
     clock: T,
@@ -30,6 +36,7 @@ pub struct Timer<T> {
 }
 
 impl<T: Clock> Timer<T> {
+    /// Runs the animation main loop.
     pub fn run(&self, mut renderer: impl Renderer) -> Result<(), Error> {
         let start = self.clock.now();
         let mut now = start;
@@ -45,6 +52,8 @@ impl<T: Clock> Timer<T> {
         renderer.end()
     }
 
+    /// Sleeps until the next frame starts.
+    /// Returns the current time.
     fn delay(&self, begin: Instant) -> Instant {
         let end = self.clock.now();
 

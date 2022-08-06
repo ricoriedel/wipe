@@ -1,3 +1,5 @@
+//! Contains all pattern traits and base patterns.
+
 mod circle;
 mod line;
 mod rhombus;
@@ -10,42 +12,59 @@ pub use wheel::*;
 
 use crate::Vector;
 
+/// A configuration for a [Pattern].
 #[derive(Copy, Clone, Default, PartialEq, Debug)]
 pub struct Config {
+    /// The size of the terminal.
     pub size: Vector,
+    /// The current state of the animation.
     pub step: f32,
 }
 
+/// A factory to create a [Pattern].
 #[cfg_attr(test, mockall::automock)]
 pub trait PatternFactory {
+    /// Creates a new [Pattern] with the given configuration.
     fn create(&self, config: &Config) -> Box<dyn Pattern>;
 }
 
+/// A pattern for an animation.
 #[cfg_attr(test, mockall::automock)]
 pub trait Pattern {
+    /// Returns the level for a given coordinate.
+    /// If it is a base pattern, the start position of the
+    /// animation should by zero and the end position should be one.
     fn sample(&self, pos: Vector) -> f32;
 }
 
+/// A factor for a [Sampler].
 #[cfg_attr(test, mockall::automock(type Sampler = MockSampler;))]
 pub trait SamplerFactory {
+    /// The type of the [Sampler].
     type Sampler: Sampler;
 
+    /// Creates a new [Sampler].
     fn create(&self, config: &Config) -> Self::Sampler;
 }
 
+/// A sampler for multiple values.
 #[cfg_attr(test, mockall::automock)]
 pub trait Sampler {
+    /// Returns the char level for a given position.
     fn char(&self, pos: Vector) -> f32;
 
+    /// Returns the color level for a given position.
     fn color(&self, pos: Vector) -> f32;
 }
 
+/// The implementation of [SamplerFactory].
 #[derive(derive_more::Constructor)]
 pub struct SamplerFactoryImpl {
     char: Box<dyn PatternFactory>,
     color: Box<dyn PatternFactory>,
 }
 
+/// The implementation of [Sampler].
 #[derive(derive_more::Constructor)]
 pub struct SamplerImpl {
     char: Box<dyn Pattern>,

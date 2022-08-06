@@ -4,18 +4,32 @@ use crossterm::cursor::*;
 use crossterm::style::*;
 use crossterm::terminal::*;
 
+/// A trait for performance optimized terminal output.
+///
+/// All commands are queue and have to be executed using [Printer::flush].
 #[cfg_attr(test, mockall::automock)]
 pub trait Printer {
+    /// Shows the cursor if it isn't visible.
     fn show_cursor(&mut self) -> Result<(), Error>;
+    /// Hides the cursor if it is visible.
     fn hide_cursor(&mut self) -> Result<(), Error>;
+    /// Prints a character.
+    /// # Panics
+    /// Panics if the character is a special character like `ESC`, `DEL` or `NEWLINE`.
     fn print(&mut self, char: char) -> Result<(), Error>;
+    /// Moves the cursor to the specified position if it isn't there already.
     fn move_to(&mut self, x: u16, y: u16) -> Result<(), Error>;
+    /// Returns the size of the terminal.
     fn size(&self) -> Result<(u16, u16), Error>;
+    /// Sets the foreground color of the terminal.
     fn set_foreground(&mut self, color: Color) -> Result<(), Error>;
+    /// Clears the terminal content.
     fn clear(&mut self) -> Result<(), Error>;
+    /// Flushes all queue commands.
     fn flush(&mut self) -> Result<(), Error>;
 }
 
+/// The implementation of [Printer].
 pub struct PrinterImpl<T> {
     term: T,
     position: (u16, u16),

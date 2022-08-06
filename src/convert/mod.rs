@@ -1,3 +1,5 @@
+//! Contains structs for converting samples to concrete types.
+
 mod char;
 mod color;
 
@@ -6,12 +8,16 @@ pub use crate::convert::color::*;
 
 use crossterm::style::Color;
 
+/// A trait to convert samples to concrete types.
 #[cfg_attr(test, mockall::automock)]
 pub trait Converter {
+    /// Converts a sample to a [CharSample].
     fn char(&self, level: f32) -> CharSample;
+    /// Converts a sample to a [Color].
     fn color(&self, level: f32) -> Color;
 }
 
+/// The implementation of [Converter].
 #[derive(derive_more::Constructor)]
 pub struct ConverterImpl<T1, T2> {
     char: T1,

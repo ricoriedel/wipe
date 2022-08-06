@@ -27,6 +27,7 @@ use rand::prelude::*;
 use std::io::stdout;
 use std::time::Duration;
 
+/// The command line arguments.
 #[derive(Parser, Default)]
 #[clap(
     author  = env!("CARGO_PKG_AUTHORS"),
@@ -34,8 +35,13 @@ use std::time::Duration;
     about   = env!("CARGO_PKG_DESCRIPTION"),
 )]
 struct Args {
-    /// Set the animation duration [milliseconds]
-    #[clap(long, default_value_t = 2000, value_parser = value_parser!(u64).range(0..=60_000))]
+    /// Set the duration as milliseconds
+    #[clap(
+        long,
+        default_value_t = 2000,
+        value_parser = value_parser!(u64).range(0..=60_000),
+        help = "Set the animation duration [milliseconds]"
+    )]
     duration: u64,
     /// Set the frames per second
     #[clap(long, default_value_t = 60, value_parser = value_parser!(u64).range(1..=480))]
@@ -78,6 +84,7 @@ struct Args {
     color_slices: Option<u8>,
 }
 
+/// All color pallets.
 #[derive(ValueEnum, Copy, Clone)]
 enum PalletEnum {
     Red,
@@ -106,6 +113,7 @@ enum PalletEnum {
     Gray,
 }
 
+/// All possible [Pattern]s.
 #[derive(ValueEnum, Copy, Clone, PartialEq, Debug)]
 enum PatternEnum {
     Circle,
@@ -114,6 +122,7 @@ enum PatternEnum {
     Wheel,
 }
 
+/// A configuration for a composed [Pattern].
 #[derive(derive_more::Constructor)]
 struct PatternConfig {
     pattern: PatternEnum,
@@ -125,6 +134,7 @@ struct PatternConfig {
 }
 
 impl Args {
+    /// Returns the configuration for the char [Pattern].
     fn char_config(&self, rng: &mut impl Rng) -> PatternConfig {
         PatternConfig::new(
             choose(self.char_pattern, rng),
@@ -136,6 +146,7 @@ impl Args {
         )
     }
 
+    /// Returns the configuration for the color [Pattern].
     fn color_config(&self, rng: &mut impl Rng) -> PatternConfig {
         PatternConfig::new(
             choose(self.color_pattern, rng),
@@ -147,6 +158,7 @@ impl Args {
         )
     }
 
+    /// Returns the colors for the [ColorConverter].
     fn pallet(&self, rng: &mut impl Rng) -> Vec<Color> {
         match choose(self.colors, rng) {
             PalletEnum::Red => vec![DarkRed, Red, White],
@@ -183,16 +195,19 @@ impl Args {
         }
     }
 
+    /// Returns the duration for the [Timer].
     fn duration(&self) -> Duration {
         Duration::from_millis(self.duration)
     }
 
+    /// Returns the delay for the [Timer].
     fn delay(&self) -> Duration {
         Duration::from_nanos(1_000_000_000 / self.fps)
     }
 }
 
 impl PatternConfig {
+    /// Creates a new base [Pattern].
     fn create_base(&self) -> Box<dyn PatternFactory> {
         match self.pattern {
             PatternEnum::Circle => Box::new(CircleFactory::new()),
@@ -202,6 +217,7 @@ impl PatternConfig {
         }
     }
 
+    /// Creates a new composed [Pattern].
     fn create(&self) -> Box<dyn PatternFactory> {
         let mut pattern = self.create_base();
 
@@ -224,6 +240,7 @@ impl PatternConfig {
     }
 }
 
+/// Returns the value of the [Option] or a random enum variant.
 fn choose<TValue: ValueEnum, TRand: Rng>(opt: Option<TValue>, rng: &mut TRand) -> TValue {
     match opt {
         Some(value) => value.clone(),

@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Formatter};
 
+/// The error type.
 pub struct Error(String);
 
 impl Debug for Error {

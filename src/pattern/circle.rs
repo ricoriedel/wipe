@@ -1,8 +1,10 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Circle].
 #[derive(derive_more::Constructor)]
 pub struct CircleFactory;
+/// A circular [Pattern].
 pub struct Circle {
     center: Vector,
     radius: f32,

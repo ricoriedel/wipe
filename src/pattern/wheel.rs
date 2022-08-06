@@ -2,8 +2,10 @@ use crate::pattern::*;
 use crate::Vector;
 use std::f32::consts::PI;
 
+/// A factory for [Wheel].
 #[derive(derive_more::Constructor)]
 pub struct WheelFactory;
+/// A fortune wheel [Pattern].
 pub struct Wheel {
     center: Vector,
 }

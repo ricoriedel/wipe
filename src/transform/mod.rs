@@ -1,3 +1,5 @@
+//! Contains transformations to apply on top of patterns.
+
 mod invert;
 mod segment;
 mod shift;

@@ -1,12 +1,14 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Segments].
 #[derive(derive_more::Constructor)]
 pub struct SegmentsFactory {
     child: Box<dyn PatternFactory>,
     segments: f32,
 }
 
+/// Converts a pattern to `n` segments each starting with zero and ending with one.
 #[derive(derive_more::Constructor)]
 pub struct Segments {
     child: Box<dyn Pattern>,

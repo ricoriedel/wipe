@@ -1,15 +1,18 @@
 use crossterm::style::Color;
 
+/// A trait to convert a sample to a [Color].
 #[cfg_attr(test, mockall::automock)]
 pub trait ColorConverter {
     fn convert(&self, level: f32) -> Color;
 }
 
+/// The implementation of [ColorConverter].
 pub struct ColorConverterImpl {
     colors: Vec<Color>,
 }
 
 impl ColorConverterImpl {
+    /// The colors used for mapping.
     pub fn new(colors: Vec<Color>) -> Self {
         Self { colors }
     }

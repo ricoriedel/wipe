@@ -1,8 +1,10 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Rhombus].
 #[derive(derive_more::Constructor)]
 pub struct RhombusFactory;
+/// A rhombus shaped [Pattern].
 pub struct Rhombus {
     center: Vector,
     distance: f32,

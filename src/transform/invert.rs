@@ -1,11 +1,15 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Invert].
+///
+/// Inverts the time of the [Config] for the child [Pattern].
 #[derive(derive_more::Constructor)]
 pub struct InvertFactory {
     child: Box<dyn PatternFactory>,
 }
 
+/// Inverts the level of the [Pattern].
 #[derive(derive_more::Constructor)]
 pub struct Invert {
     child: Box<dyn Pattern>,

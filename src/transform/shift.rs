@@ -1,11 +1,13 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Shift].
 #[derive(derive_more::Constructor)]
 pub struct ShiftFactory {
     child: Box<dyn PatternFactory>,
 }
 
+/// Offsets the [Pattern] out of screen, then moves it inside and finally outside the visible area.
 #[derive(derive_more::Constructor)]
 pub struct Shift {
     child: Box<dyn Pattern>,

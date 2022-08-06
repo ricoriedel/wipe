@@ -1,11 +1,15 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Swap].
+///
+/// Swaps the x-axis and y-axis of terminal size for the contained [Pattern].
 #[derive(derive_more::Constructor)]
 pub struct SwapFactory {
     child: Box<dyn PatternFactory>,
 }
 
+/// Swaps the x-axis and y-axis.
 #[derive(derive_more::Constructor)]
 pub struct Swap {
     child: Box<dyn Pattern>,

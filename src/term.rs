@@ -2,14 +2,20 @@ use crate::Error;
 use crossterm::{Command, QueueableCommand};
 use std::io::Write;
 
+/// A stub for OS calls and crossterm functions.
 #[cfg_attr(test, mockall::automock)]
 pub trait Terminal {
+    /// Queues a command for execution.
     fn queue<T: 'static + Command>(&mut self, cmd: T) -> Result<(), Error>;
+    /// Flushes all queued commands.
     fn flush(&mut self) -> Result<(), Error>;
+    /// Returns the current size of the terminal.
     fn size(&self) -> Result<(u16, u16), Error>;
+    /// Returns the current cursor position.
     fn position(&self) -> Result<(u16, u16), Error>;
 }
 
+/// The implementation of [Terminal].
 pub struct TerminalImpl<T> {
     out: T,
 }

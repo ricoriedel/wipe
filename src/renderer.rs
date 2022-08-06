@@ -4,13 +4,20 @@ use crate::Error;
 use crate::Printer;
 use crate::Vector;
 
+/// A renderer for an animation.
 #[cfg_attr(test, mockall::automock)]
 pub trait Renderer {
+    /// Prepares the terminal for the animation.
+    /// Call once before rendering frames.
     fn begin(&mut self) -> Result<(), Error>;
+    /// Renders the current frame and flushes.
     fn render(&mut self, step: f32) -> Result<(), Error>;
+    /// Cleans up and resets the terminal.
+    /// Call once after rendering frames.
     fn end(&mut self) -> Result<(), Error>;
 }
 
+/// The implementation of [Renderer].
 #[derive(derive_more::Constructor)]
 pub struct RendererImpl<T1, T2, T3> {
     sampler: T1,

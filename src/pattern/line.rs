@@ -1,8 +1,10 @@
 use crate::pattern::*;
 use crate::Vector;
 
+/// A factory for [Line].
 #[derive(derive_more::Constructor)]
 pub struct LineFactory;
+/// A horizontal line [Pattern].
 pub struct Line {
     width: f32,
 }
