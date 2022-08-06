@@ -1,30 +1,31 @@
 use crate::pattern::*;
 use crate::Vector;
 
-#[derive(derive_more::Constructor)]
 pub struct SliceFactory {
     child: Box<dyn PatternFactory>,
-    slices: u8,
+    width: f32,
+    rest: f32,
 }
 
+#[derive(derive_more::Constructor)]
 pub struct Slice {
     child: Box<dyn Pattern>,
     width: f32,
     rest: f32,
 }
 
-impl PatternFactory for SliceFactory {
-    fn create(&self, config: &Config) -> Box<dyn Pattern> {
-        Box::new(Slice::new(self.child.create(config), self.slices))
-    }
-}
-
-impl Slice {
-    pub fn new(child: Box<dyn Pattern>, slices: u8) -> Self {
-        let width = 1.0 / slices as f32;
+impl SliceFactory {
+    pub fn new(child: Box<dyn PatternFactory>, slices: f32) -> Self {
+        let width = 1.0 / slices;
         let rest = 1.0 - width;
 
         Self { child, width, rest }
+    }
+}
+
+impl PatternFactory for SliceFactory {
+    fn create(&self, config: &Config) -> Box<dyn Pattern> {
+        Box::new(Slice::new(self.child.create(config), self.width, self.rest))
     }
 }
 
@@ -54,7 +55,7 @@ mod test {
             .once()
             .returning(|_| Box::new(MockPattern::new()));
 
-        SliceFactory::new(Box::new(child), 4).create(&config);
+        SliceFactory::new(Box::new(child), 4.0).create(&config);
     }
 
     #[test]
@@ -66,7 +67,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = SliceFactory::new(Box::new(child), 4).create(&Config::default());
+        let sampler = SliceFactory::new(Box::new(child), 4.0).create(&Config::default());
 
         assert_abs_diff_eq!(1.0, sampler.sample(Vector::default()));
     }
@@ -80,7 +81,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = SliceFactory::new(Box::new(child), 4).create(&Config::default());
+        let sampler = SliceFactory::new(Box::new(child), 4.0).create(&Config::default());
 
         assert_abs_diff_eq!(0.0, sampler.sample(Vector::default()));
     }
@@ -94,7 +95,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = SliceFactory::new(Box::new(child), 4).create(&Config::default());
+        let sampler = SliceFactory::new(Box::new(child), 4.0).create(&Config::default());
 
         assert!(sampler.sample(Vector::default()) < 0.0);
     }
@@ -112,7 +113,7 @@ mod test {
             Box::new(sampler)
         });
 
-        let sampler = SliceFactory::new(Box::new(child), 3).create(&Config::default());
+        let sampler = SliceFactory::new(Box::new(child), 3.0).create(&Config::default());
 
         sampler.sample(Vector::new(3.0, 5.0));
     }

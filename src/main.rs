@@ -119,8 +119,8 @@ struct PatternConfig {
     shift: bool,
     invert: bool,
     swap: bool,
-    segments: u8,
-    slices: u8,
+    segments: f32,
+    slices: f32,
 }
 
 impl Args {
@@ -130,8 +130,8 @@ impl Args {
             true,
             self.char_invert.unwrap_or(rng.gen()),
             self.char_swap.unwrap_or(rng.gen()),
-            self.char_segments.unwrap_or(rng.gen_range(1..=4)),
-            self.char_slices.unwrap_or(rng.gen_range(1..=4)),
+            self.char_segments.unwrap_or(rng.gen_range(1..=4)) as f32,
+            self.char_slices.unwrap_or(rng.gen_range(1..=4)) as f32,
         )
     }
 
@@ -141,8 +141,8 @@ impl Args {
             self.color_shift.unwrap_or(rng.gen()),
             self.color_invert.unwrap_or(rng.gen()),
             self.color_swap.unwrap_or(rng.gen()),
-            1,
-            self.color_slices.unwrap_or(rng.gen_range(1..=4)),
+            1.0,
+            self.color_slices.unwrap_or(rng.gen_range(1..=4)) as f32,
         )
     }
 
@@ -213,10 +213,10 @@ impl PatternConfig {
         if self.swap {
             pattern = Box::new(SwapFactory::new(pattern))
         }
-        if self.segments != 1 {
+        if self.segments != 1.0 {
             pattern = Box::new(SegmentsFactory::new(pattern, self.segments));
         }
-        if self.slices != 1 {
+        if self.slices != 1.0 {
             pattern = Box::new(SliceFactory::new(pattern, self.slices));
         }
         pattern
@@ -257,6 +257,7 @@ fn main() -> Result<(), Error> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use approx::*;
     use rand::rngs::mock::StepRng;
 
     #[test]
@@ -335,7 +336,7 @@ mod test {
             char_segments: Some(12),
             ..Args::default()
         };
-        assert_eq!(12, args.char_config(rng).segments);
+        assert_abs_diff_eq!(12.0, args.char_config(rng).segments);
     }
 
     #[test]
@@ -345,7 +346,7 @@ mod test {
             char_slices: Some(42),
             ..Args::default()
         };
-        assert_eq!(42, args.char_config(rng).slices);
+        assert_abs_diff_eq!(42.0, args.char_config(rng).slices);
     }
 
     #[test]
@@ -393,7 +394,7 @@ mod test {
         let rng = &mut StepRng::new(1, 1);
         let args = Args::default();
 
-        assert_eq!(1, args.color_config(rng).segments);
+        assert_abs_diff_eq!(1.0, args.color_config(rng).segments);
     }
 
     #[test]
@@ -403,7 +404,7 @@ mod test {
             color_slices: Some(23),
             ..Args::default()
         };
-        assert_eq!(23, args.color_config(rng).slices);
+        assert_abs_diff_eq!(23.0, args.color_config(rng).slices);
     }
 
     #[test]
@@ -414,8 +415,8 @@ mod test {
                 shift: true,
                 invert: true,
                 swap: true,
-                segments: 3,
-                slices: 2,
+                segments: 3.0,
+                slices: 2.0,
             };
             config
                 .create()
