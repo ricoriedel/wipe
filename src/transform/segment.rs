@@ -123,7 +123,7 @@ mod test {
 
         let sampler = SegmentsFactory::new(Box::new(child), 4.0).create(&Config::default());
 
-        assert_eq!(0.96, sampler.sample(Vector::default()));
+        assert_abs_diff_eq!(0.96, sampler.sample(Vector::default()));
     }
 
     #[test]

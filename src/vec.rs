@@ -55,8 +55,8 @@ mod test {
     #[test]
     fn new() {
         let v = Vector::new(4.0, 7.0);
-        assert_eq!(4.0, v.x);
-        assert_eq!(7.0, v.y);
+        assert_abs_diff_eq!(4.0, v.x);
+        assert_abs_diff_eq!(7.0, v.y);
     }
 
     #[test]
@@ -71,7 +71,7 @@ mod test {
 
     #[test]
     fn sum() {
-        assert_eq!(11.0, Vector::new(3.0, 8.0).sum());
+        assert_abs_diff_eq!(11.0, Vector::new(3.0, 8.0).sum());
     }
 
     #[test]
