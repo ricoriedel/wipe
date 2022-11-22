@@ -35,7 +35,7 @@ use std::time::Duration;
     about   = env!("CARGO_PKG_DESCRIPTION"),
 )]
 struct Args {
-    /// Set the duration as milliseconds
+    /// Set the animation duration as milliseconds
     #[clap(
         long,
         default_value_t = 2000,
@@ -46,40 +46,40 @@ struct Args {
     /// Set the frames per second
     #[clap(long, default_value_t = 60, value_parser = value_parser!(u64).range(1..=480))]
     fps: u64,
-    /// Set the chars used to model the pattern
+    /// Choose the chars used to draw the pattern
     #[clap(long, default_value = ".:+#", value_parser = NonEmptyStringValueParser::new())]
     chars: String,
-    /// Set the pattern
+    /// Choose the pattern
     #[clap(long, value_enum)]
     char_pattern: Option<PatternEnum>,
-    /// Invert the pattern
+    /// Choose whether to invert the pattern
     #[clap(long)]
     char_invert: Option<bool>,
-    /// Swap the x-axis and y-axis of the pattern
+    /// Choose whether to swap the x-axis and y-axis of the pattern
     #[clap(long)]
     char_swap: Option<bool>,
-    /// Set the segment count of the pattern [default: 1-4]
+    /// Choose the segment count of the pattern [default: 1-4]
     #[clap(long, value_parser = value_parser!(u8).range(1..255))]
     char_segments: Option<u8>,
-    /// Set the slice count of the pattern  [default: 1-4]
+    /// Choose the slice count of the pattern  [default: 1-4]
     #[clap(long, value_parser = value_parser!(u8).range(1..255))]
     char_slices: Option<u8>,
-    /// Set the colors used to fill the pattern
+    /// Choose the colors used for the pattern
     #[clap(long, value_enum)]
     colors: Option<PalletEnum>,
-    /// Set the fill pattern
+    /// Choose the fill pattern
     #[clap(long, value_enum)]
     color_pattern: Option<PatternEnum>,
-    /// Choose if the fill pattern should move
+    /// Choose whether the fill pattern should move
     #[clap(long)]
     color_shift: Option<bool>,
-    /// Invert the fill pattern
+    /// Choose whether to invert the fill pattern
     #[clap(long)]
     color_invert: Option<bool>,
-    /// Swap the x-axis and y-axis of the fill pattern
+    /// Choose whether to swap the x-axis and y-axis of the fill pattern
     #[clap(long)]
     color_swap: Option<bool>,
-    /// Set the slice count of the fill pattern [default: 1-4]
+    /// Choose the slice count of the fill pattern [default: 1-4]
     #[clap(long, value_parser = value_parser!(u8).range(1..255))]
     color_slices: Option<u8>,
 }
