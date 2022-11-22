@@ -297,7 +297,7 @@ mod test {
             duration: 3500,
             ..Args::default()
         };
-        assert_eq!(Duration::from_secs_f32(3.5), args.duration());
+        assert_eq!(Duration::from_millis(3500), args.duration());
     }
 
     #[test]
@@ -306,7 +306,7 @@ mod test {
             fps: 20,
             ..Args::default()
         };
-        assert_eq!(Duration::from_secs_f32(0.05), args.delay());
+        assert_eq!(Duration::from_millis(50), args.delay());
     }
 
     #[test]
