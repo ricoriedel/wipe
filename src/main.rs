@@ -264,7 +264,7 @@ fn main() -> Result<(), Error> {
     let converter = ConverterImpl::new(char_converter, color_converter);
     let term = TerminalImpl::new(stdout());
     let printer = PrinterImpl::new(term)?;
-    let renderer = RendererImpl::new(sampler, converter, printer);
+    let renderer = RendererImpl::new(sampler, converter, printer)?;
 
     let clock = ClockImpl::new();
     let timer = Timer::new(clock, duration, delay);

@@ -41,15 +41,13 @@ impl<T: Clock> Timer<T> {
         let start = self.clock.now();
         let mut now = start;
 
-        renderer.begin()?;
-
         while now.duration_since(start) < self.duration {
             let step = now.duration_since(start).as_secs_f32() / self.duration.as_secs_f32();
 
             renderer.render(step)?;
             now = self.delay(now);
         }
-        renderer.end()
+        Ok(())
     }
 
     /// Sleeps until the next frame starts.
@@ -99,11 +97,6 @@ mod test {
         let renderer_seq = &mut Sequence::new();
 
         renderer
-            .expect_begin()
-            .once()
-            .returning(|| Ok(()))
-            .in_sequence(renderer_seq);
-        renderer
             .expect_render()
             .with(eq(0.0))
             .once()
@@ -114,11 +107,6 @@ mod test {
             .with(eq(0.5))
             .once()
             .returning(|_| Ok(()))
-            .in_sequence(renderer_seq);
-        renderer
-            .expect_end()
-            .once()
-            .returning(|| Ok(()))
             .in_sequence(renderer_seq);
 
         timer.run(renderer).unwrap();
@@ -155,9 +143,7 @@ mod test {
         let timer = Timer::new(clock, Duration::from_secs(10), Duration::from_secs(10));
 
         let mut renderer = MockRenderer::new();
-        renderer.expect_begin().returning(|| Ok(()));
         renderer.expect_render().returning(|_| Ok(()));
-        renderer.expect_end().returning(|| Ok(()));
 
         timer.run(renderer).unwrap();
     }
@@ -182,9 +168,7 @@ mod test {
         let timer = Timer::new(clock, Duration::from_secs(10), Duration::from_secs(10));
 
         let mut renderer = MockRenderer::new();
-        renderer.expect_begin().returning(|| Ok(()));
         renderer.expect_render().returning(|_| Ok(()));
-        renderer.expect_end().returning(|| Ok(()));
 
         timer.run(renderer).unwrap();
     }

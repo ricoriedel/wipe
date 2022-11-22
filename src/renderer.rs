@@ -3,33 +3,35 @@ use crate::pattern::*;
 use crate::Error;
 use crate::Printer;
 use crate::Vector;
+use crossterm::style::Color;
 
 /// A renderer for an animation.
 #[cfg_attr(test, mockall::automock)]
 pub trait Renderer {
-    /// Prepares the terminal for the animation.
-    /// Call once before rendering frames.
-    fn begin(&mut self) -> Result<(), Error>;
     /// Renders the current frame and flushes.
     fn render(&mut self, step: f32) -> Result<(), Error>;
-    /// Cleans up and resets the terminal.
-    /// Call once after rendering frames.
-    fn end(&mut self) -> Result<(), Error>;
 }
 
 /// The implementation of [Renderer].
-#[derive(derive_more::Constructor)]
-pub struct RendererImpl<T1, T2, T3> {
+pub struct RendererImpl<T1, T2, T3: Printer> {
     sampler: T1,
     converter: T2,
     printer: T3,
 }
 
-impl<T1: SamplerFactory, T2: Converter, T3: Printer> Renderer for RendererImpl<T1, T2, T3> {
-    fn begin(&mut self) -> Result<(), Error> {
-        self.printer.hide_cursor()
-    }
+impl<T1, T2, T3: Printer> RendererImpl<T1, T2, T3> {
+    pub fn new(sampler: T1, converter: T2, mut printer: T3) -> Result<Self, Error> {
+        printer.hide_cursor()?;
 
+        Ok(Self {
+            sampler,
+            converter,
+            printer,
+        })
+    }
+}
+
+impl<T1: SamplerFactory, T2: Converter, T3: Printer> Renderer for RendererImpl<T1, T2, T3> {
     fn render(&mut self, step: f32) -> Result<(), Error> {
         let (width, height) = self.printer.size()?;
         let config = Config {
@@ -60,12 +62,16 @@ impl<T1: SamplerFactory, T2: Converter, T3: Printer> Renderer for RendererImpl<T
         }
         self.printer.flush()
     }
+}
 
-    fn end(&mut self) -> Result<(), Error> {
-        self.printer.move_to(0, 0)?;
-        self.printer.clear()?;
-        self.printer.show_cursor()?;
-        self.printer.flush()
+impl<T1, T2, T3: Printer> Drop for RendererImpl<T1, T2, T3> {
+    fn drop(&mut self) {
+        // Errors while dropping the renderer can be safely ignored.
+        self.printer.move_to(0, 0).ok();
+        self.printer.set_foreground(Color::Reset).ok();
+        self.printer.show_cursor().ok();
+        self.printer.clear().ok();
+        self.printer.flush().ok();
     }
 }
 
@@ -81,16 +87,22 @@ mod test {
     use mockall::Sequence;
 
     #[test]
-    fn begin() {
+    fn new() {
         let factory = MockSamplerFactory::new();
         let converter = MockConverter::new();
         let mut printer = MockPrinter::new();
 
+        // Constructor
         printer.expect_hide_cursor().once().returning(|| Ok(()));
 
-        let mut renderer = RendererImpl::new(factory, converter, printer);
+        // Drop
+        printer.expect_move_to().returning(|_, _| Ok(()));
+        printer.expect_set_foreground().returning(|_| Ok(()));
+        printer.expect_show_cursor().returning(|| Ok(()));
+        printer.expect_clear().returning(|| Ok(()));
+        printer.expect_flush().returning(|| Ok(()));
 
-        renderer.begin().unwrap();
+        drop(RendererImpl::new(factory, converter, printer));
     }
 
     #[test]
@@ -163,6 +175,14 @@ mod test {
 
         let seq = &mut Sequence::new();
 
+        // Constructor
+        printer
+            .expect_hide_cursor()
+            .once()
+            .returning(|| Ok(()))
+            .in_sequence(seq);
+
+        // Rendering
         printer
             .expect_move_to()
             .once()
@@ -217,7 +237,35 @@ mod test {
             .returning(|| Ok(()))
             .in_sequence(seq);
 
-        let mut renderer = RendererImpl::new(sampler, converter, printer);
+        // Drop
+        printer
+            .expect_move_to()
+            .once()
+            .returning(|_, _| Ok(()))
+            .in_sequence(seq);
+        printer
+            .expect_set_foreground()
+            .with(eq(Color::Reset))
+            .once()
+            .returning(|_| Ok(()))
+            .in_sequence(seq);
+        printer
+            .expect_show_cursor()
+            .once()
+            .returning(|| Ok(()))
+            .in_sequence(seq);
+        printer
+            .expect_clear()
+            .once()
+            .returning(|| Ok(()))
+            .in_sequence(seq);
+        printer
+            .expect_flush()
+            .once()
+            .returning(|| Ok(()))
+            .in_sequence(seq);
+
+        let mut renderer = RendererImpl::new(sampler, converter, printer).unwrap();
 
         renderer.render(0.0).unwrap();
     }
@@ -237,7 +285,17 @@ mod test {
         printer.expect_size().returning(|| Ok((3, 2)));
         printer.expect_flush().returning(|| Ok(()));
 
-        let mut renderer = RendererImpl::new(sampler, converter, printer);
+        // Constructor
+        printer.expect_hide_cursor().returning(|| Ok(()));
+
+        // Drop
+        printer.expect_move_to().returning(|_, _| Ok(()));
+        printer.expect_set_foreground().returning(|_| Ok(()));
+        printer.expect_show_cursor().returning(|| Ok(()));
+        printer.expect_clear().returning(|| Ok(()));
+        printer.expect_flush().returning(|| Ok(()));
+
+        let mut renderer = RendererImpl::new(sampler, converter, printer).unwrap();
 
         renderer.render(0.8).unwrap();
     }
@@ -249,6 +307,11 @@ mod test {
         let mut printer = MockPrinter::new();
 
         let seq = &mut Sequence::new();
+
+        // Constructor
+        printer.expect_hide_cursor().returning(|| Ok(()));
+
+        // Drop
         printer
             .expect_move_to()
             .with(eq(0), eq(0))
@@ -256,12 +319,18 @@ mod test {
             .returning(|_, _| Ok(()))
             .in_sequence(seq);
         printer
-            .expect_clear()
+            .expect_set_foreground()
+            .with(eq(Color::Reset))
+            .once()
+            .returning(|_| Ok(()))
+            .in_sequence(seq);
+        printer
+            .expect_show_cursor()
             .once()
             .returning(|| Ok(()))
             .in_sequence(seq);
         printer
-            .expect_show_cursor()
+            .expect_clear()
             .once()
             .returning(|| Ok(()))
             .in_sequence(seq);
@@ -271,8 +340,6 @@ mod test {
             .returning(|| Ok(()))
             .in_sequence(seq);
 
-        let mut renderer = RendererImpl::new(factory, converter, printer);
-
-        renderer.end().unwrap();
+        drop(RendererImpl::new(factory, converter, printer));
     }
 }
