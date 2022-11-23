@@ -21,6 +21,12 @@ impl From<&str> for Error {
     }
 }
 
+impl From<ctrlc::Error> for Error {
+    fn from(err: ctrlc::Error) -> Self {
+        Error(err.to_string())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

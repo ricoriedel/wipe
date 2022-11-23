@@ -1,5 +1,6 @@
 use crate::Error;
 use crate::Renderer;
+use cancellation::CancellationToken;
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -29,23 +30,23 @@ impl Clock for ClockImpl {
 
 /// A timer for rendering.
 #[derive(derive_more::Constructor)]
-pub struct Timer<T> {
+pub struct Executor<T> {
     clock: T,
     duration: Duration,
     delay: Duration,
 }
 
-impl<T: Clock> Timer<T> {
+impl<T: Clock> Executor<T> {
     /// Runs the animation main loop.
-    pub fn run(&self, mut renderer: impl Renderer) -> Result<(), Error> {
+    pub fn run(&self, mut renderer: impl Renderer, token: &CancellationToken) -> Result<(), Error> {
         let start = self.clock.now();
-        let mut now = start;
+        let mut tick = start;
 
-        while now.duration_since(start) < self.duration {
-            let step = now.duration_since(start).as_secs_f32() / self.duration.as_secs_f32();
+        while !token.is_canceled() && tick.duration_since(start) < self.duration {
+            let step = tick.duration_since(start).as_secs_f32() / self.duration.as_secs_f32();
 
             renderer.render(step)?;
-            now = self.delay(now);
+            tick = self.delay(tick);
         }
         Ok(())
     }
@@ -66,6 +67,7 @@ impl<T: Clock> Timer<T> {
 mod test {
     use super::*;
     use crate::MockRenderer;
+    use cancellation::CancellationTokenSource;
     use mockall::predicate::eq;
     use mockall::Sequence;
 
@@ -91,7 +93,7 @@ mod test {
             .return_const(begin + Duration::from_secs(20))
             .in_sequence(clock_seq);
 
-        let timer = Timer::new(clock, Duration::from_secs(20), Duration::from_secs(10));
+        let timer = Executor::new(clock, Duration::from_secs(20), Duration::from_secs(10));
 
         let mut renderer = MockRenderer::new();
         let renderer_seq = &mut Sequence::new();
@@ -109,7 +111,7 @@ mod test {
             .returning(|_| Ok(()))
             .in_sequence(renderer_seq);
 
-        timer.run(renderer).unwrap();
+        timer.run(renderer, CancellationToken::none()).unwrap();
     }
 
     #[test]
@@ -140,12 +142,12 @@ mod test {
             .return_const(begin + Duration::from_secs(10))
             .in_sequence(clock_seq);
 
-        let timer = Timer::new(clock, Duration::from_secs(10), Duration::from_secs(10));
+        let timer = Executor::new(clock, Duration::from_secs(10), Duration::from_secs(10));
 
         let mut renderer = MockRenderer::new();
         renderer.expect_render().returning(|_| Ok(()));
 
-        timer.run(renderer).unwrap();
+        timer.run(renderer, CancellationToken::none()).unwrap();
     }
 
     #[test]
@@ -165,11 +167,30 @@ mod test {
             .return_const(begin + Duration::from_secs(12))
             .in_sequence(clock_seq);
 
-        let timer = Timer::new(clock, Duration::from_secs(10), Duration::from_secs(10));
+        let timer = Executor::new(clock, Duration::from_secs(10), Duration::from_secs(10));
 
         let mut renderer = MockRenderer::new();
         renderer.expect_render().returning(|_| Ok(()));
 
-        timer.run(renderer).unwrap();
+        timer.run(renderer, CancellationToken::none()).unwrap();
+    }
+
+    #[test]
+    fn run_canceled_aborts() {
+        let mut clock = MockClock::new();
+        let mut renderer = MockRenderer::new();
+        let src = CancellationTokenSource::new();
+        let token = src.token().clone();
+
+        clock.expect_now().return_const(Instant::now());
+        clock.expect_sleep().once().return_const(());
+        renderer.expect_render().once().returning(move |_| {
+            src.cancel();
+
+            Ok(())
+        });
+        let timer = Executor::new(clock, Duration::from_secs(10), Duration::from_secs(1));
+
+        timer.run(renderer, &token).unwrap();
     }
 }

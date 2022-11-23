@@ -3,22 +3,23 @@ pub mod pattern;
 pub mod transform;
 
 mod error;
+mod exec;
 mod printer;
 mod renderer;
 mod term;
-mod timer;
 mod vec;
 
 pub use error::*;
+pub use exec::*;
 pub use printer::*;
 pub use renderer::*;
 pub use term::*;
-pub use timer::*;
 pub use vec::*;
 
 use crate::convert::*;
 use crate::pattern::*;
 use crate::transform::*;
+use cancellation::CancellationTokenSource;
 use clap::builder::NonEmptyStringValueParser;
 use clap::{value_parser, Parser, ValueEnum};
 use crossterm::style::Color;
@@ -267,9 +268,15 @@ fn main() -> Result<(), Error> {
     let renderer = RendererImpl::new(sampler, converter, printer)?;
 
     let clock = ClockImpl::new();
-    let timer = Timer::new(clock, duration, delay);
+    let executor = Executor::new(clock, duration, delay);
 
-    timer.run(renderer)
+    let src = CancellationTokenSource::new();
+    let token = src.token().clone();
+
+    ctrlc::set_handler(move || {
+        src.cancel();
+    })?;
+    executor.run(renderer, &token)
 }
 
 #[cfg(test)]
