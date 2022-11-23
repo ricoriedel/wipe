@@ -62,9 +62,9 @@ struct Args {
     /// Choose the segment count of the pattern [default: 1-4]
     #[clap(long, value_parser = value_parser!(u8).range(1..255))]
     char_segments: Option<u8>,
-    /// Choose the slice count of the pattern  [default: 1-4]
+    /// Choose the factor by which to shrink the pattern [default: 1-4]
     #[clap(long, value_parser = value_parser!(u8).range(1..255))]
-    char_slices: Option<u8>,
+    char_shrink: Option<u8>,
     /// Choose the colors used for the pattern
     #[clap(long, value_enum)]
     colors: Option<PalletEnum>,
@@ -80,9 +80,9 @@ struct Args {
     /// Choose whether to swap the x-axis and y-axis of the fill pattern
     #[clap(long)]
     color_swap: Option<bool>,
-    /// Choose the slice count of the fill pattern [default: 1-4]
+    /// Choose the segment count of the fill pattern [default: 1-4]
     #[clap(long, value_parser = value_parser!(u8).range(1..255))]
-    color_slices: Option<u8>,
+    color_segments: Option<u8>,
 }
 
 /// All color pallets.
@@ -131,7 +131,7 @@ struct PatternConfig {
     invert: bool,
     swap: bool,
     segments: f32,
-    slices: f32,
+    shrink: f32,
 }
 
 impl Args {
@@ -143,7 +143,7 @@ impl Args {
             self.char_invert.unwrap_or(rng.gen()),
             self.char_swap.unwrap_or(rng.gen()),
             self.char_segments.unwrap_or(rng.gen_range(1..=4)) as f32,
-            self.char_slices.unwrap_or(rng.gen_range(1..=4)) as f32,
+            self.char_shrink.unwrap_or(rng.gen_range(1..=4)) as f32,
         )
     }
 
@@ -154,8 +154,8 @@ impl Args {
             self.color_shift.unwrap_or(rng.gen()),
             self.color_invert.unwrap_or(rng.gen()),
             self.color_swap.unwrap_or(rng.gen()),
+            self.color_segments.unwrap_or(rng.gen_range(1..=4)) as f32,
             1.0,
-            self.color_slices.unwrap_or(rng.gen_range(1..=4)) as f32,
         )
     }
 
@@ -234,8 +234,8 @@ impl PatternConfig {
         if self.segments != 1.0 {
             pattern = Box::new(SegmentsFactory::new(pattern, self.segments));
         }
-        if self.slices != 1.0 {
-            pattern = Box::new(SliceFactory::new(pattern, self.slices));
+        if self.shrink != 1.0 {
+            pattern = Box::new(ShrinkFactory::new(pattern, self.shrink));
         }
         pattern
     }
@@ -365,13 +365,13 @@ mod test {
     }
 
     #[test]
-    fn char_config_slices() {
+    fn char_config_shrink() {
         let rng = &mut StepRng::new(1, 1);
         let args = Args {
-            char_slices: Some(42),
+            char_shrink: Some(42),
             ..Args::default()
         };
-        assert_abs_diff_eq!(42.0, args.char_config(rng).slices);
+        assert_abs_diff_eq!(42.0, args.char_config(rng).shrink);
     }
 
     #[test]
@@ -417,19 +417,20 @@ mod test {
     #[test]
     fn color_config_segments() {
         let rng = &mut StepRng::new(1, 1);
-        let args = Args::default();
+        let args = Args {
+            color_segments: Some(23),
+            ..Args::default()
+        };
 
-        assert_abs_diff_eq!(1.0, args.color_config(rng).segments);
+        assert_abs_diff_eq!(23.0, args.color_config(rng).segments);
     }
 
     #[test]
-    fn color_config_slices() {
+    fn color_config_shrink() {
         let rng = &mut StepRng::new(1, 1);
-        let args = Args {
-            color_slices: Some(23),
-            ..Args::default()
-        };
-        assert_abs_diff_eq!(23.0, args.color_config(rng).slices);
+        let args = Args::default();
+
+        assert_abs_diff_eq!(1.0, args.color_config(rng).shrink);
     }
 
     #[test]
@@ -441,7 +442,7 @@ mod test {
                 invert: true,
                 swap: true,
                 segments: 3.0,
-                slices: 2.0,
+                shrink: 2.0,
             };
             config
                 .create()

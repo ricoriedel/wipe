@@ -6,10 +6,10 @@ wipe \
   --char-pattern rhombus \
   --char-invert true \
   --char-segments 2 \
-  --char-slices 2 \
+  --char-shrink 2 \
   --char-swap false \
   --color-pattern wheel \
-  --color-slices 2 \
+  --color-segments 2 \
   --color-invert true \
   --color-shift true \
   --color-swap false \

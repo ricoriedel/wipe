@@ -6,10 +6,10 @@ wipe \
   --char-pattern wheel \
   --char-invert false \
   --char-segments 2 \
-  --char-slices 2 \
+  --char-shrink 2 \
   --char-swap false \
   --color-pattern circle \
-  --color-slices 4 \
+  --color-segments 4 \
   --color-invert false \
   --color-shift false \
   --color-swap false \
