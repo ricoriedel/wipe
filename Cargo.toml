@@ -8,10 +8,10 @@ repository = "https://github.com/ricoriedel/wipe"
 authors = ["Rico Riedel <rico.riedel@protonmail.ch>"]
 
 [dependencies]
-clap = { version = "4.0.26", features = ["derive"] }
-crossterm = "0.25.0"
-ctrlc = "3.2.3"
-cancellation = "0.1.0"
+clap = { version = "4.0", features = ["derive"] }
+crossterm = "0.25"
+ctrlc = "3.2"
+cancellation = "0.1"
 derive_more = "0.99"
 rand = "0.8"
 

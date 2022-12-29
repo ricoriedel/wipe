@@ -30,14 +30,14 @@ use std::time::Duration;
 
 /// The command line arguments.
 #[derive(Parser, Default)]
-#[clap(
+#[command(
     author  = env!("CARGO_PKG_AUTHORS"),
     version = env!("CARGO_PKG_VERSION"),
     about   = env!("CARGO_PKG_DESCRIPTION"),
 )]
 struct Args {
     /// Set the animation duration as milliseconds
-    #[clap(
+    #[arg(
         long,
         default_value_t = 2000,
         value_parser = value_parser!(u64).range(0..=60_000),
@@ -45,43 +45,43 @@ struct Args {
     )]
     duration: u64,
     /// Set the frames per second
-    #[clap(long, default_value_t = 60, value_parser = value_parser!(u64).range(1..=480))]
+    #[arg(long, default_value_t = 60, value_parser = value_parser!(u64).range(1..=480))]
     fps: u64,
     /// Choose the chars used to draw the pattern
-    #[clap(long, default_value = ".:+#", value_parser = NonEmptyStringValueParser::new())]
+    #[arg(long, default_value = ".:+#", value_parser = NonEmptyStringValueParser::new())]
     chars: String,
     /// Choose the pattern
-    #[clap(long, value_enum)]
+    #[arg(long, value_enum)]
     char_pattern: Option<PatternEnum>,
     /// Choose whether to invert the pattern
-    #[clap(long)]
+    #[arg(long)]
     char_invert: Option<bool>,
     /// Choose whether to swap the x-axis and y-axis of the pattern
-    #[clap(long)]
+    #[arg(long)]
     char_swap: Option<bool>,
     /// Choose the segment count of the pattern [default: 1-4]
-    #[clap(long, value_parser = value_parser!(u8).range(1..255))]
+    #[arg(long, value_parser = value_parser!(u8).range(1..255))]
     char_segments: Option<u8>,
     /// Choose the factor by which to shrink the pattern [default: 1-4]
-    #[clap(long, value_parser = value_parser!(u8).range(1..255))]
+    #[arg(long, value_parser = value_parser!(u8).range(1..255))]
     char_shrink: Option<u8>,
     /// Choose the colors used for the pattern
-    #[clap(long, value_enum)]
+    #[arg(long, value_enum)]
     colors: Option<PalletEnum>,
     /// Choose the fill pattern
-    #[clap(long, value_enum)]
+    #[arg(long, value_enum)]
     color_pattern: Option<PatternEnum>,
     /// Choose whether the fill pattern should move
-    #[clap(long)]
+    #[arg(long)]
     color_shift: Option<bool>,
     /// Choose whether to invert the fill pattern
-    #[clap(long)]
+    #[arg(long)]
     color_invert: Option<bool>,
     /// Choose whether to swap the x-axis and y-axis of the fill pattern
-    #[clap(long)]
+    #[arg(long)]
     color_swap: Option<bool>,
     /// Choose the segment count of the fill pattern [default: 1-4]
-    #[clap(long, value_parser = value_parser!(u8).range(1..255))]
+    #[arg(long, value_parser = value_parser!(u8).range(1..255))]
     color_segments: Option<u8>,
 }
 
