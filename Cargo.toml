@@ -9,7 +9,7 @@ authors = ["Rico Riedel <rico.riedel@protonmail.ch>"]
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-crossterm = "0.25"
+crossterm = "0.26"
 ctrlc = "3.2"
 cancellation = "0.1"
 derive_more = "0.99"
